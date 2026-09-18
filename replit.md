@@ -1,45 +1,58 @@
-# [Project name]
+# MatchZone
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+MatchZone is a football streaming frontend with a secured MySQL REST API for accounts, fixtures, teams, competitions, favorites, streams, and notifications.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server using the configured `PORT`
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required backend env: `DATABASE_URL` (MySQL URL), `JWT_SECRET` (32+ character secret), and `PORT`
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- API: Express 5 + TypeScript
+- DB: MySQL 8+ via `mysql2`
+- Validation: Zod
+- Authentication: JWT access tokens + bcrypt password hashes
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/matchzone` — React/Vite frontend
+- `artifacts/api-server/src/config` — environment validation
+- `artifacts/api-server/src/database` — MySQL pool and schema initialization
+- `artifacts/api-server/src/models` — database query models
+- `artifacts/api-server/src/controllers` — request handlers
+- `artifacts/api-server/src/routes` — REST route registration
+- `artifacts/api-server/src/middlewares` — validation, JWT authentication, authorization, and error handling
+- `artifacts/api-server/.env.example` — required local environment variable names
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The API server owns MySQL access directly through a bounded `mysql2` connection pool; it does not import the workspace's PostgreSQL/Drizzle library.
+- The server validates `DATABASE_URL` and requires `JWT_SECRET` at startup so it cannot silently run against the wrong database or an insecure fallback secret.
+- Authenticated request identity is derived from the verified JWT and authorization for admin writes is enforced in route middleware.
+- Tables are initialized idempotently on startup with foreign keys and indexes; no application password or secret is stored in source.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The frontend provides MatchZone's fan experience. The REST API exposes account registration/login, current-user profile access, matches/live matches, match events and lineups, teams, competitions, favorites, protected match streams, and user notifications.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Backend requested with Node.js, Express, TypeScript, MySQL, JWT, and bcrypt.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The existing workspace-managed `DATABASE_URL` is PostgreSQL in the current environment; the MatchZone API intentionally refuses it and requires a MySQL URL.
+- `JWT_SECRET` was not provided, so the API workflow will not start until it is configured as a secret.
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `artifacts/api-server/src/database/schema.sql` for the human-readable table reference.
+- See the `artifacts/api-server` package scripts for typechecking and bundling.

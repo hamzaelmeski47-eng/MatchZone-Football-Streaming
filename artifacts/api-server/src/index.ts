@@ -1,25 +1,22 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { env } from "./config/env";
+import { initializeDatabase } from "./database/mysql";
 
-const rawPort = process.env["PORT"];
+async function start() {
+  await initializeDatabase();
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
+  app.listen(env.port, (err) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
+
+    logger.info({ port: env.port }, "MatchZone API server listening");
+  });
 }
 
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-
-  logger.info({ port }, "Server listening");
+start().catch((err) => {
+  logger.error({ err }, "Unable to start MatchZone API server");
+  process.exit(1);
 });
