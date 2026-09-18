@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "MatchZone"
+description = "A premium football streaming frontend for following live matches, teams, competitions, and personal favorites with a polished responsive experience."
+version = "1.0.0"
+id = "artifacts/matchzone"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25379
+
+[services.development]
+run = "pnpm --filter @workspace/matchzone run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/matchzone", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/matchzone/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25379"
+BASE_PATH = "/"
