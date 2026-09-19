@@ -1,0 +1,1 @@
+- [External MySQL provisioning](external-mysql-provisioning.md) — MatchZone requires a user-provided MySQL URL because the workspace-managed DATABASE_URL is PostgreSQL.
