@@ -1,7 +1,10 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { CalendarDays, ChevronRight, CircleUserRound, Clock3, Heart, Home, Menu, Radio, Search, Star, Trophy, Users, X, Zap } from 'lucide-react';
-import { getCompetition, getTeam, type Competition, type Match, type Team } from '@/lib/mock-data';
+import { type Competition, type Match, type Team } from '@/lib/mock-data';
+import { useAuth, useMatchZoneData } from '@/lib/app-state';
+
+export { useFavorites } from '@/lib/app-state';
 
 type ButtonProps = { children: ReactNode; variant?: 'primary' | 'secondary' | 'ghost'; className?: string; type?: 'button' | 'submit'; onClick?: () => void; disabled?: boolean; };
 export function Button({ children, variant = 'primary', className = '', type = 'button', onClick, disabled }: ButtonProps) {
@@ -25,9 +28,10 @@ export function Modal({ open, title, onClose, children }: { open: boolean; title
 export function Header() {
   const [location, setLocation] = useLocation();
   const [search, setSearch] = useState('');
+  const { user } = useAuth();
   const nav = [['/', 'Home'], ['/live', 'Live'], ['/matches', 'Matches'], ['/competitions', 'Competitions'], ['/teams', 'Teams']];
   const handleSubmit = () => { if (search.trim()) setLocation(`/matches?search=${encodeURIComponent(search.trim())}`); };
-  return <header className="topbar"><div className="topbar-inner"><Link href="/" className="brand" data-testid="link-brand"><span className="brand-mark" />MatchZone</Link><nav className="desktop-nav" aria-label="Main navigation">{nav.map(([href, label]) => <Link key={href} href={href} className={`nav-link ${location === href ? 'active' : ''}`} data-testid={`link-nav-${label.toLowerCase()}`}>{label}</Link>)}</nav><SearchBar value={search} onChange={setSearch} onSubmit={handleSubmit} className="header-search" /><Link href="/favorites" className="header-action" aria-label="Favorites" data-testid="link-favorites"><Heart size={16} /></Link>{location === '/profile' ? <Link href="/profile" className="avatar" data-testid="link-profile-avatar">JD</Link> : <Link href="/login" className="header-login" data-testid="link-login">Log in</Link>}</div></header>;
+  return <header className="topbar"><div className="topbar-inner"><Link href="/" className="brand" data-testid="link-brand"><span className="brand-mark" />MatchZone</Link><nav className="desktop-nav" aria-label="Main navigation">{nav.map(([href, label]) => <Link key={href} href={href} className={`nav-link ${location === href ? 'active' : ''}`} data-testid={`link-nav-${label.toLowerCase()}`}>{label}</Link>)}</nav><SearchBar value={search} onChange={setSearch} onSubmit={handleSubmit} className="header-search" /><Link href="/favorites" className="header-action" aria-label="Favorites" data-testid="link-favorites"><Heart size={16} /></Link>{user ? <Link href="/profile" className="avatar" data-testid="link-profile-avatar">{user.displayName.slice(0, 2).toUpperCase()}</Link> : <Link href="/login" className="header-login" data-testid="link-login">Log in</Link>}</div></header>;
 }
 
 export function MobileNavigation() {
@@ -41,7 +45,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 export function MatchCard({ match, favorite, onFavorite, compact = false }: { match: Match; favorite: boolean; onFavorite: (id: string) => void; compact?: boolean }) {
-  const home = getTeam(match.home); const away = getTeam(match.away); const competition = getCompetition(match.competitionId);
+  const { teams, competitions } = useMatchZoneData();
+  const home = teams.find((team) => team.id === match.home) ?? teams[0];
+  const away = teams.find((team) => team.id === match.away) ?? teams[0];
+  const competition = competitions.find((item) => item.id === match.competitionId) ?? competitions[0];
   return <article className={`match-card ${match.status === 'live' ? 'hero-live-card' : ''}`} data-testid={`card-match-${match.id}`}><button className={`star-btn ${favorite ? 'favorited' : ''}`} onClick={() => onFavorite(match.id)} aria-label={`Favorite ${home.name} vs ${away.name}`} data-testid={`button-favorite-${match.id}`}><Star size={15} fill={favorite ? 'currentColor' : 'none'} /></button><div className="match-top"><span className="competition-label"><i className="competition-dot" style={{ background: competition.accent }} />{competition.name}</span>{match.status === 'live' ? <span className="live-label"><i className="pulse-dot" />{match.minute}</span> : <span>{match.time}</span>}</div><Link href={`/match/${match.id}`} className="match-teams" data-testid={`link-match-${match.id}`}><span className="team-mini"><i className="team-crest" style={{ borderColor: home.color }}>{home.short}</i><b className="team-mini-name">{home.name}</b></span><strong className={`score ${match.status === 'upcoming' ? 'muted-score' : ''} ${match.status === 'live' ? 'featured-score' : ''}`}>{match.status === 'upcoming' ? '–' : `${match.homeScore} : ${match.awayScore}`}</strong><span className="team-mini"><b className="team-mini-name">{away.name}</b><i className="team-crest" style={{ borderColor: away.color }}>{away.short}</i></span></Link>{!compact && <div className="match-bottom"><span>{match.venue}</span><Link href={`/match/${match.id}`} className="section-link" data-testid={`link-details-${match.id}`}>Details <ChevronRight size={13} style={{ verticalAlign: 'middle' }} /></Link></div>}</article>;
 }
 
@@ -64,12 +71,6 @@ export function EmptyState({ icon = <Heart size={19} />, title, copy, action }: 
 export function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => { const timer = window.setTimeout(onClose, 3000); return () => window.clearTimeout(timer); }, [message, onClose]);
   return <div className="toast-note" role="status" data-testid="status-toast">{message}</div>;
-}
-
-export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('matchzone-favorites') ?? '[]') as string[]; } catch { return []; } });
-  const toggleFavorite = (id: string) => setFavorites((current) => { const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]; localStorage.setItem('matchzone-favorites', JSON.stringify(next)); return next; });
-  return { favorites, toggleFavorite };
 }
 
 export function DataIcon({ kind }: { kind: 'clock' | 'menu' | 'users' | 'zap' }) {
