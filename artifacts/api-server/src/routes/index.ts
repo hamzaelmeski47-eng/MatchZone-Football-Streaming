@@ -7,6 +7,8 @@ import competitionsRouter from "./competitions.routes";
 import favoritesRouter from "./favorites.routes";
 import streamsRouter from "./streams.routes";
 import notificationsRouter from "./notifications.routes";
+import footballRouter from "./football.routes";
+import newsRouter from "./news.routes";
 
 const router: IRouter = Router();
 
@@ -18,5 +20,7 @@ router.use("/competitions", competitionsRouter);
 router.use("/favorites", favoritesRouter);
 router.use("/streams", streamsRouter);
 router.use("/notifications", notificationsRouter);
+router.use("/football", footballRouter);
+router.use("/news", newsRouter);
 
 export default router;

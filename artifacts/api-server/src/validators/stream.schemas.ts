@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const streamMatchParamsSchema = z.object({
-  matchId: z.coerce.number().int().positive(),
+  matchId: z.string().trim().min(1),
 });
 
 export const streamIdParamsSchema = z.object({

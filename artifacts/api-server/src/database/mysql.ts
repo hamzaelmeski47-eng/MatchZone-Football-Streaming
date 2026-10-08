@@ -120,12 +120,11 @@ const schemaStatements = [
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     match_id BIGINT UNSIGNED NOT NULL,
     provider VARCHAR(100) NOT NULL,
-    label VARCHAR(150) NOT NULL,
-    url VARCHAR(2048) NOT NULL,
+    stream_url VARCHAR(2048) NOT NULL,
+    stream_type ENUM('hls', 'dash') NOT NULL DEFAULT 'hls',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_streams_match FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     INDEX idx_streams_match_active (match_id, is_active)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   `CREATE TABLE IF NOT EXISTS notifications (
@@ -141,8 +140,16 @@ const schemaStatements = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 ];
 
+export let isDatabaseConnected = false;
+
 export async function initializeDatabase() {
-  for (const statement of schemaStatements) {
-    await pool.query(statement);
+  try {
+    for (const statement of schemaStatements) {
+      await pool.query(statement);
+    }
+    isDatabaseConnected = true;
+  } catch (err: any) {
+    isDatabaseConnected = false;
+    // Do not crash server if MySQL is not running; we have real live API data!
   }
 }

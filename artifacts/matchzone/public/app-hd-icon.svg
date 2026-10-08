@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f16"/>
+      <stop offset="50%" stop-color="#0f151f"/>
+      <stop offset="100%" stop-color="#070a0f"/>
+    </linearGradient>
+
+    <!-- App Card Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121a24"/>
+      <stop offset="100%" stop-color="#090d13"/>
+    </linearGradient>
+
+    <!-- Neon Lime Green Gradient -->
+    <linearGradient id="neonGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3ff20"/>
+      <stop offset="50%" stop-color="#6beb00"/>
+      <stop offset="100%" stop-color="#55db00"/>
+    </linearGradient>
+
+    <!-- Inner Core Bright Lime -->
+    <linearGradient id="coreGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4ff70"/>
+      <stop offset="100%" stop-color="#80f000"/>
+    </linearGradient>
+
+    <!-- High Definition Multi-layer Neon Glow Filter -->
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur1"/>
+      <feGaussianBlur stdDeviation="12" result="blur2"/>
+      <feGaussianBlur stdDeviation="24" result="blur3"/>
+      <feMerge>
+        <feMergeNode in="blur3"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="ambientGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="35"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Border on App Card -->
+  <rect x="6" y="6" width="500" height="500" rx="110" fill="none" stroke="#223344" stroke-width="3" stroke-opacity="0.3"/>
+
+  <!-- Ambient Light Behind the Icon -->
+  <ellipse cx="256" cy="256" rx="140" ry="140" fill="#6beb00" opacity="0.12" filter="url(#ambientGlow)"/>
+
+  <!-- Main Neon Squircle Ring (Slightly organic/dynamic curvature matching user image) -->
+  <g filter="url(#neonGlow)">
+    <!-- Outer Neon Tube -->
+    <rect 
+      x="108" 
+      y="108" 
+      width="296" 
+      height="296" 
+      rx="92" 
+      fill="none" 
+      stroke="url(#neonGreen)" 
+      stroke-width="36" 
+      stroke-linejoin="round"
+    />
+
+    <!-- Concentric Center Circle -->
+    <circle 
+      cx="256" 
+      cy="256" 
+      r="66" 
+      fill="none" 
+      stroke="url(#neonGreen)" 
+      stroke-width="26"
+    />
+
+    <!-- Center Solid Dot -->
+    <circle 
+      cx="256" 
+      cy="256" 
+      r="28" 
+      fill="url(#coreGreen)"
+    />
+  </g>
+</svg>

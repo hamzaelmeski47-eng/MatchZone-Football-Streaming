@@ -11,7 +11,16 @@ export function validate<T>(
 ): RequestHandler {
   return (req, _res, next) => {
     const parsed = schema.parse(req[target]);
-    req[target] = parsed as never;
+    if (target === "query") {
+      Object.defineProperty(req, "query", {
+        value: parsed,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    } else {
+      req[target] = parsed as never;
+    }
     next();
   };
 }

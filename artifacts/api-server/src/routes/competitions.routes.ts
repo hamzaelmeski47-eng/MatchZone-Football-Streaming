@@ -6,6 +6,7 @@ import {
   createCompetitionController,
   getCompetition,
   getCompetitions,
+  getStandings,
 } from "../controllers/catalog.controller";
 import {
   createCompetitionSchema,
@@ -24,6 +25,11 @@ router.get(
   "/:id",
   validate(numericIdSchema, "params"),
   asyncHandler(getCompetition),
+);
+router.get(
+  "/:id/standings",
+  validate(numericIdSchema, "params"),
+  asyncHandler(getStandings),
 );
 router.post(
   "/",
