@@ -159,15 +159,16 @@ export function LiveSources({
       });
     }
     setSources((prev) => {
-      const cleanEmbedUrl = ch.embedUrl.replace(
-        /matchora\.to\/embed\/match\/[^?]+\?.*ch=([0-9a-zA-Z_-]+)/i,
-        'matchora.to/embed/channel/$1'
-      );
+      let finalEmbedUrl = ch.embedUrl;
+      const chIdMatch = finalEmbedUrl.match(/matchora\.to\/embed\/channel\/([0-9a-zA-Z_-]+)/i);
+      if (chIdMatch && chIdMatch[1]) {
+        finalEmbedUrl = `https://matchora.to/embed/match/${matchId}?ch=${chIdMatch[1]}`;
+      }
       const newSource: LiveSource = {
         id: `channel-${ch.id}`,
         name: ch.name,
         type: 'embed',
-        embedUrl: cleanEmbedUrl,
+        embedUrl: finalEmbedUrl,
         status: 'active',
         quality: ch.quality || 'HD',
         channel: ch.name,

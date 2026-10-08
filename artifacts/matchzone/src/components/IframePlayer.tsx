@@ -204,11 +204,15 @@ export function IframePlayer({ src, title, onError, onSwitchNext }: IframePlayer
 
       {/* Responsive Video Player Iframe */}
       {(() => {
-        // Rewrite ?ch= match embeds to direct /embed/channel/ embeds
+        // Ensure Matchora embed URLs always use valid /embed/match/{eventId}?ch={channelId} format.
+        // Standalone /embed/channel/{id} triggers "Channel unavailable, use the embed: matchora.to/developers".
         let cleanSrc = src;
-        const chMatch = src.match(/matchora\.to\/embed\/match\/[^?]+\?.*ch=([0-9a-zA-Z_-]+)/i);
-        if (chMatch && chMatch[1]) {
-          cleanSrc = `https://matchora.to/embed/channel/${chMatch[1]}`;
+        const chDirectMatch = cleanSrc.match(/matchora\.to\/embed\/channel\/([0-9a-zA-Z_-]+)/i);
+        if (chDirectMatch && chDirectMatch[1]) {
+          const pageMatch = typeof window !== 'undefined' ? window.location.pathname.match(/\/match\/(\d+)/) : null;
+          if (pageMatch && pageMatch[1]) {
+            cleanSrc = `https://matchora.to/embed/match/${pageMatch[1]}?ch=${chDirectMatch[1]}`;
+          }
         }
 
         return (

@@ -245,7 +245,7 @@ export async function getLiveSourcesForMatch(
           name: c.name,
           lang: c.lang,
           quality: c.quality || "HD",
-          embedUrl: c.embed_url || `https://matchora.to/embed/channel/${c.id}`,
+          embedUrl: `https://matchora.to/embed/match/${fixtureId}?ch=${c.id}`,
         }));
     }
   } catch {
