@@ -33,8 +33,11 @@ import {
   generateFallbackLineups,
   generateFallbackStatistics,
   getComprehensiveStandings,
+  getMatchRealFormAndH2H,
+  fetchRealTeamRecentForm,
 } from "../services/football.service";
 import { SUPPORTED_COMPETITIONS, ACTIVE_COMPETITION_IDS } from "../config/competitions.config";
+import { resolveTeamBadge } from "../services/team-logos";
 import { env } from "../config/env";
 import { asyncHandler } from "../utils/async-handler";
 import { logger } from "../lib/logger";
@@ -420,33 +423,361 @@ export function normalizeTeamName(name: string): string {
   return s;
 }
 
+// Canonical team keys map for 100% accurate deduplication across multiple spelling variants and Arabic/English transliterations
+const CANONICAL_TEAM_KEYS: Record<string, string> = {
+  // Saudi Pro League
+  "alqadsiah": "alqadsiah",
+  "alquadisiya": "alqadsiah",
+  "alqadisiya": "alqadsiah",
+  "qadsiah": "alqadsiah",
+  "quadisiya": "alqadsiah",
+  "qadisiya": "alqadsiah",
+  "القادسية": "alqadsiah",
+  "alkholood": "alkholood",
+  "alkholod": "alkholood",
+  "kholood": "alkholood",
+  "kholod": "alkholood",
+  "الخلود": "alkholood",
+  "alfateh": "alfateh",
+  "fateh": "alfateh",
+  "الفتح": "alfateh",
+  "alahli": "alahli",
+  "alahlisaudi": "alahli",
+  "alahlisfc": "alahli",
+  "ahli": "alahli",
+  "ahlisaudi": "alahli",
+  "الأهلي": "alahli",
+  "الأهلي السعودي": "alahli",
+  "aldiriyah": "aldiriyah",
+  "diriyah": "aldiriyah",
+  "الدرعية": "aldiriyah",
+  "alnassr": "alnassr",
+  "nassr": "alnassr",
+  "النصر": "alnassr",
+  "alhilal": "alhilal",
+  "hilal": "alhilal",
+  "الهلال": "alhilal",
+  "alittihad": "alittihad",
+  "ittihad": "alittihad",
+  "الاتحاد": "alittihad",
+  "alshabab": "alshabab",
+  "shabab": "alshabab",
+  "الشباب": "alshabab",
+  "alettifaq": "alettifaq",
+  "ettifaq": "alettifaq",
+  "الاتفاق": "alettifaq",
+  "altaawoun": "altaawoun",
+  "altaawon": "altaawoun",
+  "taawoun": "altaawoun",
+  "taawon": "altaawoun",
+  "التعاون": "altaawoun",
+  "alkhaleej": "alkhaleej",
+  "khaleej": "alkhaleej",
+  "الخليج": "alkhaleej",
+  "alokhdood": "alokhdood",
+  "alakhdoud": "alokhdood",
+  "okhdood": "alokhdood",
+  "akhdoud": "alokhdood",
+  "الأخدود": "alokhdood",
+  "alwehda": "alwehda",
+  "alwahda": "alwehda",
+  "wehda": "alwehda",
+  "wahda": "alwehda",
+  "الوحدة": "alwehda",
+  "alriyadh": "alriyadh",
+  "riyadh": "alriyadh",
+  "الرياض": "alriyadh",
+  "alfayha": "alfayha",
+  "fayha": "alfayha",
+  "الفيحاء": "alfayha",
+  "alraed": "alraed",
+  "raed": "alraed",
+  "الرائد": "alraed",
+  "damac": "damac",
+  "damak": "damac",
+  "ضمك": "damac",
+  "alorubah": "alorubah",
+  "alorobah": "alorubah",
+  "orubah": "alorubah",
+  "orobah": "alorubah",
+  "العروبة": "alorubah",
+  "alhazem": "alhazem",
+  "hazem": "alhazem",
+  "الحزم": "alhazem",
+  "albatin": "albatin",
+  "batin": "albatin",
+  "الباطن": "albatin",
+  "altai": "altai",
+  "tai": "altai",
+  "الطائي": "altai",
+  "abha": "abha",
+  "أبها": "abha",
+
+  // Moroccan Botola Pro
+  "raja": "raja",
+  "rajaca": "raja",
+  "rajacasablanca": "raja",
+  "الرجاء": "raja",
+  "الرجاء الرياضي": "raja",
+  "wydad": "wydad",
+  "wydadac": "wydad",
+  "wydadcasablanca": "wydad",
+  "الوداد": "wydad",
+  "الوداد الرياضي": "wydad",
+  "asfar": "asfar",
+  "farrabat": "asfar",
+  "الجيش الملكي": "asfar",
+  "rsberkane": "rsberkane",
+  "renaissanceberkane": "rsberkane",
+  "نهضة بركان": "rsberkane",
+  "fusrabat": "fusrabat",
+  "fus": "fusrabat",
+  "الفتح الرباطي": "fusrabat",
+  "الفتح الرياضي": "fusrabat",
+  "masfes": "masfes",
+  "maghrebfes": "masfes",
+  "المغرب الفاسي": "masfes",
+  "irttangier": "irttangier",
+  "ittihadtanger": "irttangier",
+  "اتحاد طنجة": "irttangier",
+  "husaagadir": "husaagadir",
+  "hassaniaagadir": "husaagadir",
+  "حسنية أكادير": "husaagadir",
+  "ocssafi": "ocssafi",
+  "olympicsafi": "ocssafi",
+  "أولمبيك آسفي": "ocssafi",
+  "mattetouan": "mattetouan",
+  "moghrebtetouan": "mattetouan",
+  "المغرب التطواني": "mattetouan",
+  "utstouarga": "utstouarga",
+  "uniontouarga": "utstouarga",
+  "اتحاد تواركة": "utstouarga",
+  "dhjeljadida": "dhjeljadida",
+  "difaaeljadidi": "dhjeljadida",
+  "الدفاع الحسني الجديدي": "dhjeljadida",
+  "codmmeknes": "codmmeknes",
+  "codmeknes": "codmmeknes",
+  "النادي المكناسي": "codmmeknes",
+  "jsssoualem": "jsssoualem",
+  "jssoualem": "jsssoualem",
+  "شباب السوالم": "jsssoualem",
+  "sccmmohammedia": "sccmmohammedia",
+  "chababmohammedia": "sccmmohammedia",
+  "شباب المحمدية": "sccmmohammedia",
+  "rcazzemamra": "rcazzemamra",
+  "renaissancezemamra": "rcazzemamra",
+  "نهضة الزمامرة": "rcazzemamra",
+
+  // Egyptian League
+  "alahly": "alahly",
+  "ahly": "alahly",
+  "الأهلي المصري": "alahly",
+  "zamalek": "zamalek",
+  "الزمالك": "zamalek",
+  "pyramids": "pyramids",
+  "بيراميدز": "pyramids",
+};
+
+export function getCanonicalTeamKey(name: string): string {
+  const norm = normalizeTeamName(name);
+  if (CANONICAL_TEAM_KEYS[norm]) return CANONICAL_TEAM_KEYS[norm];
+
+  // Try trimmed Arabic and Latin lookup
+  const clean = (name || "").toLowerCase().trim();
+  if (CANONICAL_TEAM_KEYS[clean]) return CANONICAL_TEAM_KEYS[clean];
+
+  for (const [alias, canonical] of Object.entries(CANONICAL_TEAM_KEYS)) {
+    if (clean.includes(alias) || norm.includes(alias)) {
+      return canonical;
+    }
+  }
+
+  // Strip prefixes like "al", "el"
+  return norm.replace(/^(al|el)/, "");
+}
+
+function stringSimilarityScore(a: string, b: string): number {
+  if (!a || !b) return 0;
+  if (a === b) return 1.0;
+  if (a.includes(b) || b.includes(a)) return 0.85;
+
+  const setA = new Set(a.split(""));
+  const setB = new Set(b.split(""));
+  let intersection = 0;
+  for (const char of setA) {
+    if (setB.has(char)) intersection++;
+  }
+  return (2.0 * intersection) / (setA.size + setB.size);
+}
+
 export function areMatchesSame(
   homeA: string,
   awayA: string,
   homeB: string,
   awayB: string
 ): boolean {
-  const hA = normalizeTeamName(homeA);
-  const aA = normalizeTeamName(awayA);
-  const hB = normalizeTeamName(homeB);
-  const aB = normalizeTeamName(awayB);
+  const cHA = getCanonicalTeamKey(homeA);
+  const cAA = getCanonicalTeamKey(awayA);
+  const cHB = getCanonicalTeamKey(homeB);
+  const cAB = getCanonicalTeamKey(awayB);
 
-  if (!hA || !aA || !hB || !aB) return false;
+  if (cHA && cHB && cAA && cAB) {
+    if ((cHA === cHB || cHA.includes(cHB) || cHB.includes(cHA)) &&
+        (cAA === cAB || cAA.includes(cAB) || cAB.includes(cAA))) {
+      return true;
+    }
+    if ((cHA === cAB || cHA.includes(cAB) || cAB.includes(cHA)) &&
+        (cAA === cHB || cAA.includes(cHB) || cHB.includes(cAA))) {
+      return true;
+    }
+  }
 
-  const direct =
-    (hA === hB || hA.includes(hB) || hB.includes(hA)) &&
-    (aA === aB || aA.includes(aB) || aB.includes(aA));
-  const reversed =
-    (hA === aB || hA.includes(aB) || aB.includes(hA)) &&
-    (aA === hB || aA.includes(hB) || hB.includes(aA));
+  const hSim = stringSimilarityScore(cHA, cHB);
+  const aSim = stringSimilarityScore(cAA, cAB);
+  if (hSim >= 0.72 && aSim >= 0.72) return true;
 
-  return direct || reversed;
+  return false;
+}
+
+/**
+ * Standardizes league naming, IDs, and logos across all providers to avoid duplicate leagues.
+ */
+export function normalizeFixtureLeague(fixture: ApiFootballFixture): void {
+  if (!fixture || !fixture.league) return;
+  const rawName = (fixture.league.name || "").toLowerCase().trim();
+
+  // Saudi Pro League
+  if (
+    rawName.includes("saudi") ||
+    rawName.includes("roshn") ||
+    rawName.includes("سعودي") ||
+    fixture.league.id === 307
+  ) {
+    fixture.league.name = "دوري روشن السعودي";
+    fixture.league.country = "Saudi Arabia";
+    fixture.league.id = 307;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/307.png";
+    return;
+  }
+
+  // Moroccan Botola Pro
+  if (
+    rawName.includes("botola") ||
+    rawName.includes("المغربي") ||
+    rawName.includes("البطولة") ||
+    fixture.league.id === 200
+  ) {
+    fixture.league.name = "البطولة الوطنية الاحترافية";
+    fixture.league.country = "Morocco";
+    fixture.league.id = 200;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/200.png";
+    return;
+  }
+
+  // Egyptian Premier League
+  if (rawName.includes("egypt") || rawName.includes("المصري") || fixture.league.id === 233) {
+    fixture.league.name = "الدوري المصري الممتاز";
+    fixture.league.country = "Egypt";
+    fixture.league.id = 233;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/233.png";
+    return;
+  }
+
+  // English Premier League
+  if ((rawName.includes("premier league") || rawName.includes("إنجليزي")) && !rawName.includes("egypt")) {
+    fixture.league.name = "الدوري الإنجليزي الممتاز";
+    fixture.league.country = "England";
+    fixture.league.id = 39;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/39.png";
+    return;
+  }
+
+  // Spanish La Liga
+  if (rawName.includes("la liga") || rawName.includes("laliga") || rawName.includes("إسباني") || fixture.league.id === 140) {
+    fixture.league.name = "الدوري الإسباني";
+    fixture.league.country = "Spain";
+    fixture.league.id = 140;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/140.png";
+    return;
+  }
+
+  // Italian Serie A
+  if ((rawName.includes("serie a") || rawName.includes("إيطالي")) && !rawName.includes("brazil")) {
+    fixture.league.name = "الدوري الإيطالي";
+    fixture.league.country = "Italy";
+    fixture.league.id = 135;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/135.png";
+    return;
+  }
+
+  // German Bundesliga
+  if (rawName.includes("bundesliga") || rawName.includes("ألماني") || fixture.league.id === 78) {
+    fixture.league.name = "الدوري الألماني";
+    fixture.league.country = "Germany";
+    fixture.league.id = 78;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/78.png";
+    return;
+  }
+
+  // French Ligue 1
+  if (rawName.includes("ligue 1") || rawName.includes("فرنسي") || fixture.league.id === 61) {
+    fixture.league.name = "الدوري الفرنسي";
+    fixture.league.country = "France";
+    fixture.league.id = 61;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/61.png";
+    return;
+  }
+
+  // UEFA Champions League
+  if (rawName.includes("champions league") || rawName.includes("أبطال أوروبا") || fixture.league.id === 2) {
+    fixture.league.name = "دوري أبطال أوروبا";
+    fixture.league.country = "Europe";
+    fixture.league.id = 2;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/2.png";
+    return;
+  }
+
+  // UEFA Europa League
+  if (rawName.includes("europa league") || rawName.includes("الدوري الأوروبي") || fixture.league.id === 3) {
+    fixture.league.name = "الدوري الأوروبي";
+    fixture.league.country = "Europe";
+    fixture.league.id = 3;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/3.png";
+    return;
+  }
+
+  // UEFA Conference League
+  if (rawName.includes("conference") || rawName.includes("المؤتمر") || fixture.league.id === 848) {
+    fixture.league.name = "دوري المؤتمر الأوروبي";
+    fixture.league.country = "Europe";
+    fixture.league.id = 848;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/848.png";
+    return;
+  }
+
+  // UEFA Nations League
+  if (rawName.includes("nations league") || rawName.includes("الأمم الأوروبية") || fixture.league.id === 7) {
+    fixture.league.name = "دوري الأمم الأوروبية";
+    fixture.league.country = "Europe";
+    fixture.league.id = 7;
+    fixture.league.logo = "https://a.espncdn.com/i/leaguelogos/soccer/500/2395.png";
+    return;
+  }
 }
 
 export function deduplicateFixtures(fixtures: ApiFootballFixture[]): ApiFootballFixture[] {
   const result: ApiFootballFixture[] = [];
 
   for (const fixture of fixtures) {
+    // Normalize league and resolve genuine team badges
+    normalizeFixtureLeague(fixture);
+    if (!fixture.teams.home.logo || fixture.teams.home.logo.includes("placeholder") || fixture.teams.home.logo.includes("53.png")) {
+      fixture.teams.home.logo = resolveTeamBadge(fixture.teams.home, fixture.teams.home.name, fixture.league.country);
+    }
+    if (!fixture.teams.away.logo || fixture.teams.away.logo.includes("placeholder") || fixture.teams.away.logo.includes("53.png")) {
+      fixture.teams.away.logo = resolveTeamBadge(fixture.teams.away, fixture.teams.away.name, fixture.league.country);
+    }
+
     const homeName = fixture.teams?.home?.name || "";
     const awayName = fixture.teams?.away?.name || "";
     const fixtureId = fixture.fixture?.id;
@@ -481,59 +812,60 @@ export function deduplicateFixtures(fixtures: ApiFootballFixture[]): ApiFootball
       const isNewMatchora = newId < 10000000;
       const isExistingMatchora = existingId < 10000000;
 
-      // Always prefer the live fixture over a scheduled one
+      // Prefer live data over non-live
       if (isNewLive && !isExistingLive) {
-        if (!fixture.teams.home.logo && existing.teams.home.logo) {
+        if (!fixture.teams.home.logo || fixture.teams.home.logo.includes("53.png")) {
           fixture.teams.home.logo = existing.teams.home.logo;
         }
-        if (!fixture.teams.away.logo && existing.teams.away.logo) {
+        if (!fixture.teams.away.logo || fixture.teams.away.logo.includes("53.png")) {
           fixture.teams.away.logo = existing.teams.away.logo;
         }
+        normalizeFixtureLeague(fixture);
         result[existingIndex] = fixture;
         continue;
       } else if (!isNewLive && isExistingLive) {
-        if (!existing.teams.home.logo && fixture.teams.home.logo) {
+        if (!existing.teams.home.logo || existing.teams.home.logo.includes("53.png")) {
           existing.teams.home.logo = fixture.teams.home.logo;
         }
-        if (!existing.teams.away.logo && fixture.teams.away.logo) {
+        if (!existing.teams.away.logo || existing.teams.away.logo.includes("53.png")) {
           existing.teams.away.logo = fixture.teams.away.logo;
         }
+        normalizeFixtureLeague(existing);
         continue;
       }
 
+      // If one fixture is Matchora (stream-bearing) and the other is ESPN/API-Football (rich metadata):
+      // Merge best of both: Matchora ID (for streaming) + ESPN's badges/scores/league details!
       if (isNewMatchora && !isExistingMatchora) {
-        if (!fixture.teams.home.logo && existing.teams.home.logo) {
+        // Keep Matchora fixture so stream works, but copy rich badges and league from ESPN
+        if (existing.teams.home.logo && !existing.teams.home.logo.includes("53.png")) {
           fixture.teams.home.logo = existing.teams.home.logo;
         }
-        if (!fixture.teams.away.logo && existing.teams.away.logo) {
+        if (existing.teams.away.logo && !existing.teams.away.logo.includes("53.png")) {
           fixture.teams.away.logo = existing.teams.away.logo;
         }
-        if (
-          fixture.league.name === "كرة القدم العالمية" &&
-          existing.league.name !== "كرة القدم العالمية"
-        ) {
-          fixture.league = existing.league;
+        if (existing.goals?.home != null) {
+          fixture.goals = existing.goals;
         }
+        normalizeFixtureLeague(fixture);
         result[existingIndex] = fixture;
       } else if (isExistingMatchora && !isNewMatchora) {
-        if (!existing.teams.home.logo && fixture.teams.home.logo) {
+        if (fixture.teams.home.logo && !fixture.teams.home.logo.includes("53.png")) {
           existing.teams.home.logo = fixture.teams.home.logo;
         }
-        if (!existing.teams.away.logo && fixture.teams.away.logo) {
+        if (fixture.teams.away.logo && !fixture.teams.away.logo.includes("53.png")) {
           existing.teams.away.logo = fixture.teams.away.logo;
         }
-        if (
-          existing.league.name === "كرة القدم العالمية" &&
-          fixture.league.name !== "كرة القدم العالمية"
-        ) {
-          existing.league = fixture.league;
-        }
-        if (isNewLive && (!isExistingLive || (fixture.fixture.status.elapsed && !existing.fixture.status.elapsed))) {
-          existing.fixture.status = fixture.fixture.status;
+        if (fixture.goals?.home != null) {
           existing.goals = fixture.goals;
         }
+        if (fixture.fixture.status?.elapsed) {
+          existing.fixture.status = fixture.fixture.status;
+        }
+        normalizeFixtureLeague(existing);
       } else {
         if (isNewLive && (!isExistingLive || (fixture.fixture.status.elapsed && !existing.fixture.status.elapsed))) {
+          normalizeFixtureLeague(fixture);
           result[existingIndex] = fixture;
         }
       }
@@ -1023,6 +1355,50 @@ router.get(
       res.json({ standings: [] });
     } catch (err) {
       res.json({ standings: [] });
+    }
+  })
+);
+
+/**
+ * GET /api/football/matches/:id/form
+ * Real 5 matches for home team and away team + H2H
+ */
+router.get(
+  "/matches/:id/form",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const fixtureId = String(req.params.id);
+      const home = (req.query.home as string) || "";
+      const away = (req.query.away as string) || "";
+      const competition = (req.query.competition as string) || "الدوري";
+
+      const data = await getMatchRealFormAndH2H(fixtureId, home, away, competition);
+      res.json(data);
+    } catch (err: any) {
+      logger.warn({ err: err?.message, id: req.params.id }, "Match form retrieval issue");
+      res.json({ homeForm: null, awayForm: null, h2h: null });
+    }
+  })
+);
+
+/**
+ * GET /api/football/teams/form
+ * Real 5 matches for a specific team by name
+ */
+router.get(
+  "/teams/form",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const name = (req.query.name as string) || "";
+      if (!name) {
+        res.status(400).json({ error: "Team name required", code: "NAME_REQUIRED" });
+        return;
+      }
+      const data = await fetchRealTeamRecentForm(name);
+      res.json({ form: data });
+    } catch (err: any) {
+      logger.warn({ err: err?.message, name: req.query.name }, "Team form retrieval issue");
+      res.json({ form: null });
     }
   })
 );

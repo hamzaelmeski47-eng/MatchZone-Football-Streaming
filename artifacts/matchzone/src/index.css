@@ -5532,7 +5532,7 @@ html.dark .match-status-finished {
 .match-scoreboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 16px;
   padding: 24px 8px;
   width: 100%;
@@ -5601,12 +5601,13 @@ html.dark .match-team-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   gap: 8px;
   min-width: 0;
   flex-shrink: 0;
   box-sizing: border-box;
+  padding-top: 14px;
 }
 
 .match-big-score {
@@ -5793,6 +5794,7 @@ html.dark .match-details-tab-btn.active {
   }
   .match-scoreboard-grid {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: start;
     gap: 4px;
     padding: 12px 0;
     width: 100%;
@@ -5825,7 +5827,7 @@ html.dark .match-details-tab-btn.active {
   .match-center-board {
     min-width: 0 !important;
     width: auto;
-    padding: 0 4px;
+    padding: 6px 4px 0 4px;
     flex-shrink: 0;
     gap: 2px;
   }

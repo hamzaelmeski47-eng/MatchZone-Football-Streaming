@@ -619,14 +619,54 @@ const FAMOUS_SCORERS: Record<string, string[]> = {
   'الولايات المتحدة': ['كريستيان بوليسيتش', 'تيموثي وياه', 'فولارين بالوغون'],
   'mexico': ['سانتياغو خيمينيز', 'إديسون ألفاريز'],
   'المكسيك': ['سانتياغو خيمينيز', 'إديسون ألفاريز'],
+  'uzbekistan': ['إلدور شومورودوف', 'جلال الدين ماشاريبوف', 'عبوسبيك فايزولاييف', 'أوستون أورونوف', 'إيغور سيرغييف'],
+  'أوزبكستان': ['إلدور شومورودوف', 'جلال الدين ماشاريبوف', 'عبوسبيك فايزولاييف', 'أوستون أورونوف', 'إيغور سيرغييف'],
 
   // European & Arab Clubs
   'al ahli': ['رياض محرز', 'روبرتو فيرمينو', 'إيفان توني', 'فرانك كيسي'],
   'الأهلي السعودي': ['رياض محرز', 'روبرتو فيرمينو', 'إيفان توني', 'فرانك كيسي'],
-  'al shabab': ['يانيك كاراسكو', 'عبد الرزاق حمد الله'],
-  'الشباب': ['يانيك كاراسكو', 'عبد الرزاق حمد الله'],
-  'al ettifaq': ['موسى ديمبيلي', 'جورجينيو فاينالدوم'],
-  'الاتفاق': ['موسى ديمبيلي', 'جورجينيو فاينالدوم'],
+  'al shabab': ['يانيك كاراسكو', 'عبد الرزاق حمد الله', 'دانييل بودينسي', 'مصعب الجوير'],
+  'الشباب': ['يانيك كاراسكو', 'عبد الرزاق حمد الله', 'دانييل بودينسي', 'مصعب الجوير'],
+  'al ettifaq': ['موسى ديمبيلي', 'جورجينيو فاينالدوم', 'سيكو فوفانا'],
+  'الاتفاق': ['موسى ديمبيلي', 'جورجينيو فاينالدوم', 'سيكو فوفانا'],
+  'al-qadsiah': ['بيير إيميريك أوباميانغ', 'جوليان كينيونيس', 'ناهيتان نانديز', 'كاميرون بويرتاس', 'تركي العمار'],
+  'al qadsiah': ['بيير إيميريك أوباميانغ', 'جوليان كينيونيس', 'ناهيتان نانديز', 'كاميرون بويرتاس', 'تركي العمار'],
+  'al qadisiya': ['بيير إيميريك أوباميانغ', 'جوليان كينيونيس', 'ناهيتان نانديز', 'كاميرون بويرتاس', 'تركي العمار'],
+  'al-qadisiyah': ['بيير إيميريك أوباميانغ', 'جوليان كينيونيس', 'ناهيتان نانديز', 'كاميرون بويرتاس', 'تركي العمار'],
+  'القادسية': ['بيير إيميريك أوباميانغ', 'جوليان كينيونيس', 'ناهيتان نانديز', 'كاميرون بويرتاس', 'تركي العمار'],
+  'al-kholood': ['ميزياني ماوليدا', 'أليكس كولادو', 'جاكسون موليكا', 'همام الهمامي', 'أليو ديانغ'],
+  'al kholood': ['ميزياني ماوليدا', 'أليكس كولادو', 'جاكسون موليكا', 'همام الهمامي', 'أليو ديانغ'],
+  'al-khlood': ['ميزياني ماوليدا', 'أليكس كولادو', 'جاكسون موليكا', 'همام الهمامي', 'أليو ديانغ'],
+  'الخلود': ['ميزياني ماوليدا', 'أليكس كولادو', 'جاكسون موليكا', 'همام الهمامي', 'أليو ديانغ'],
+  'al-fateh': ['سفيان بن دبكة', 'مراد باتنا', 'دجانيني تافاريس', 'لوكاس زيلارايان'],
+  'al fateh': ['سفيان بن دبكة', 'مراد باتنا', 'دجانيني تافاريس', 'لوكاس زيلارايان'],
+  'الفتح': ['سفيان بن دبكة', 'مراد باتنا', 'دجانيني تافاريس', 'لوكاس زيلارايان'],
+  'al-diriyah': ['عبد العزيز البلادي', 'سلطان السوادي'],
+  'al diriyah': ['عبد العزيز البلادي', 'سلطان السوادي'],
+  'الدرعية': ['عبد العزيز البلادي', 'سلطان السوادي'],
+  'al-taawoun': ['موسى بارو', 'جواو بيدرو', 'أشرف المهديوي'],
+  'al taawoun': ['موسى بارو', 'جواو بيدرو', 'أشرف المهديوي'],
+  'التعاون': ['موسى بارو', 'جواو بيدرو', 'أشرف المهديوي'],
+  'al-riyadh': ['فايز سليماني', 'إبراهيم بايش', 'توزي'],
+  'al riyadh': ['فايز سليماني', 'إبراهيم بايش', 'توزي'],
+  'الرياض': ['فايز سليماني', 'إبراهيم بايش', 'توزي'],
+  'al-wehda': ['أوديون إيغالو', 'يوسف أمين', 'علاء آل حجي'],
+  'al wehda': ['أوديون إيغالو', 'يوسف أمين', 'علاء آل حجي'],
+  'الوحدة': ['أوديون إيغالو', 'يوسف أمين', 'علاء آل حجي'],
+  'al-fayha': ['فاشيون ساكالا', 'أليخاندرو بوزويلو', 'كريس سمولينغ'],
+  'al fayha': ['فاشيون ساكالا', 'أليخاندرو بوزويلو', 'كريس سمولينغ'],
+  'الفيحاء': ['فاشيون ساكالا', 'أليخاندرو بوزويلو', 'كريس سمولينغ'],
+  'al-orobah': ['كريستيان تيو', 'كورت زوما', 'إيمانويل بواتينغ'],
+  'al orobah': ['كريستيان تيو', 'كورت زوما', 'إيمانويل بواتينغ'],
+  'العروبة': ['كريستيان تيو', 'كورت زوما', 'إيمانويل بواتينغ'],
+  'damac': ['جورج كيفين نكودو', 'نيكولاي ستانسيو', 'فرانسوا كامانو'],
+  'ضمك': ['جورج كيفين نكودو', 'نيكولاي ستانسيو', 'فرانسوا كامانو'],
+  'al-akhdood': ['إبراهيما كوني', 'سافيور غودوين', 'خوان بيدروزا'],
+  'al akhdood': ['إبراهيما كوني', 'سافيور غودوين', 'خوان بيدروزا'],
+  'الأخدود': ['إبراهيما كوني', 'سافيور غودوين', 'خوان بيدروزا'],
+  'al-raed': ['أمير سعيود', 'كريم البركاوي', 'محمد فوزير'],
+  'al raed': ['أمير سعيود', 'كريم البركاوي', 'محمد فوزير'],
+  'الرائد': ['أمير سعيود', 'كريم البركاوي', 'محمد فوزير'],
   'dortmund': ['سيرهو غيراسي', 'كريم أديمي', 'جوليان براندت'],
   'بوروسيا دورتموند': ['سيرهو غيراسي', 'كريم أديمي', 'جوليان براندت'],
   'leverkusen': ['فلوريان فيرتز', 'فيكتور بونيفاس', 'أليخاندرو غريمالدو'],
@@ -727,12 +767,24 @@ const FAMOUS_SCORERS: Record<string, string[]> = {
   'النصر': ['كريستيانو رونالدو', 'ساديو ماني', 'أندرسون تاليسكا', 'أوتافيو'],
   'al ittihad': ['كريم بنزيما', 'موسى ديابي', 'حسام عوار', 'ستيفن بيرجوين'],
   'الاتحاد': ['كريم بنزيما', 'موسى ديابي', 'حسام عوار', 'ستيفن بيرجوين'],
-  'wydad': ['سيف الدين بوهرة', 'كاسيوس مايلولا', 'حمزة الساخي'],
-  'الوداد': ['سيف الدين بوهرة', 'كاسيوس مايلولا', 'حمزة الساخي'],
-  'raja': ['يسري بوزوق', 'نوفل الزرهوني', 'آدم النفاتي'],
-  'الرجاء': ['يسري بوزوق', 'نوفل الزرهوني', 'آدم النفاتي'],
-  'as far': 'توميسانغ أوروبوني، ربيع حريمات، حمزة إكمان'.split('، '),
-  'الجيش الملكي': 'توميسانغ أوروبوني، ربيع حريمات، حمزة إكمان'.split('، '),
+  'wydad': ['سيف الدين بوهرة', 'كاسيوس مايلولا', 'حمزة الساخي', 'جمال حركاس'],
+  'الوداد': ['سيف الدين بوهرة', 'كاسيوس مايلولا', 'حمزة الساخي', 'جمال حركاس'],
+  'raja': ['يسري بوزوق', 'نوفل الزرهوني', 'آدم النفاتي', 'صابر بوغرين'],
+  'الرجاء': ['يسري بوزوق', 'نوفل الزرهوني', 'آدم النفاتي', 'صابر بوغرين'],
+  'as far': ['ربيع حريمات', 'أمين زحزوح', 'توميسانغ أوروبوني', 'حمزة إكمان'],
+  'الجيش الملكي': ['ربيع حريمات', 'أمين زحزوح', 'توميسانغ أوروبوني', 'حمزة إكمان'],
+  'berkane': ['يوسوفو دايو', 'بول باسين', 'أسامة المليوي', 'ياسين لبحيري'],
+  'نهضة بركان': ['يوسوفو دايو', 'بول باسين', 'أسامة المليوي', 'ياسين لبحيري'],
+  'fus rabat': ['حمزة هنوري', 'أمين لمسن'],
+  'الفتح الرباطي': ['حمزة هنوري', 'أمين لمسن'],
+  'ittihad tanger': ['محسن متولي', 'إسماعيل خافي', 'أحمد حمودان'],
+  'اتحاد طنجة': ['محسن متولي', 'إسماعيل خافي', 'أحمد حمودان'],
+  'maghreb fez': ['حميد أحداد', 'محسن بوريكة'],
+  'المغرب الفاسي': ['حميد أحداد', 'محسن بوريكة'],
+  'olympic safi': ['يونس النجاري', 'عبد الغفور مهري'],
+  'أولمبيك آسفي': ['يونس النجاري', 'عبد الغفور مهري'],
+  'hassania agadir': ['جمال الشماخ', 'كاتي كاتولوندي'],
+  'حسنية أكادير': ['جمال الشماخ', 'كاتي كاتولوندي'],
   'al ahly': ['وسام أبو علي', 'إمام عاشور', 'حسين الشحات', 'بيرسي تاو'],
   'الأهلي': ['وسام أبو علي', 'إمام عاشور', 'حسين الشحات', 'بيرسي تاو'],
   'zamalek': ['أحمد سيد زيزو', 'سيف الدين الجزيري', 'ناصر ماهر'],
@@ -741,14 +793,36 @@ const FAMOUS_SCORERS: Record<string, string[]> = {
 
 // Realistic authentic pools of real footballers by category
 const REAL_STARS_FALLBACK: Record<string, string[]> = {
-  arab: ['موسى التعمري', 'أيمن حسين', 'عدي الدباغ', 'يزن النعيمات', 'علي علوان', 'أكرم عفيف', 'سالم الدوسري', 'يوسف المساكني', 'حكيم زياش', 'محمد صلاح'],
+  arab: ['سالم الدوسري', 'فراس البريكان', 'رياض محرز', 'سفيان رحيمي', 'أيوب الكعبي', 'يوسف النصيري', 'موسى التعمري', 'أيمن حسين', 'أكرم عفيف', 'محمد صلاح'],
   southAmerica: ['غابرييل سانتوس', 'لوكاس سيلفا', 'رودريغو أوليفيرا', 'ماتيوس بيريرا', 'برونو هنريكي', 'إدواردو كارفالهو', 'يوري ألبيرتو', 'إينير فالنسيا'],
   europe: ['ميكيل ميرينو', 'ألفارو موراتا', 'لوكا مودريتش', 'ماركوس تورام', 'فيديريكو كييزا', 'جمال موسيالا', 'داني أولمو', 'كودي جاكبو'],
 };
 
-function getFallbackScorers(teamName: string, count: number, seedNum: number): GoalScorerItem[] {
+function isArabContext(teamName: string, leagueName?: string): boolean {
+  const cleanT = (teamName || '').toLowerCase();
+  const cleanL = (leagueName || '').toLowerCase();
+  const arabKeywords = [
+    'المغرب', 'السعودية', 'مصر', 'الجزائر', 'تونس', 'العراق', 'الأردن', 'قطر', 'الإمارات', 'الكويت',
+    'البحرين', 'عمان', 'عُمان', 'سوريا', 'فلسطين', 'لبنان', 'السودان', 'ليبيا', 'اليمن', 'موريتانيا',
+    'الهلال', 'النصر', 'الاتحاد', 'الأهلي', 'الشباب', 'الاتفاق', 'القادسية', 'الخلود', 'الفتح',
+    'الوداد', 'الرجاء', 'الجيش الملكي', 'نهضة بركان', 'الزمالك', 'بيراميدز', 'الترجي', 'النجم الساحلي',
+    'arab', 'saudi', 'morocco', 'egypt', 'botola', 'jordan', 'iraq', 'qatar', 'uae', 'tunisia', 'algeria',
+    'al-', 'al ', 'qadsiah', 'kholood', 'fateh', 'shabab', 'ittihad', 'hilal', 'nassr', 'ahli', 'wydad',
+    'raja', 'berkane', 'tanger', 'diriyah', 'taawoun', 'riyadh', 'wehda', 'fayha', 'orobah', 'damac',
+    'akhdood', 'raed'
+  ];
+  return arabKeywords.some(k => cleanT.includes(k) || cleanL.includes(k));
+}
+
+function getFallbackScorers(
+  teamName: string,
+  count: number,
+  seedNum: number,
+  maxMinute: number = 90,
+  leagueName?: string
+): GoalScorerItem[] {
   if (count <= 0) return [];
-  const clean = teamName.toLowerCase();
+  const clean = teamName.toLowerCase().trim();
   
   // Try exact or partial match in FAMOUS_SCORERS
   let pool: string[] | null = null;
@@ -759,35 +833,29 @@ function getFallbackScorers(teamName: string, count: number, seedNum: number): G
     }
   }
 
-  // If no direct key match, select authentic realistic star footballers by region (NEVER generic labels!)
+  // If no direct key match, select authentic realistic star footballers by region
   if (!pool || pool.length === 0) {
     if (isBrazilianClubName(teamName) || clean.includes('brazil') || clean.includes('conmebol') || clean.includes('argentina')) {
       pool = REAL_STARS_FALLBACK.southAmerica;
-    } else if (
-      /[\u0600-\u06FF]/.test(teamName) ||
-      clean.includes('arab') ||
-      clean.includes('jordan') ||
-      clean.includes('iraq') ||
-      clean.includes('morocco') ||
-      clean.includes('egypt') ||
-      clean.includes('saudi') ||
-      clean.includes('tunisia') ||
-      clean.includes('algeria')
-    ) {
+    } else if (isArabContext(teamName, leagueName)) {
       pool = REAL_STARS_FALLBACK.arab;
     } else {
       pool = REAL_STARS_FALLBACK.europe;
     }
   }
 
-  const minutesList = [14, 28, 35, 42, 53, 67, 78, 88, 90];
+  // Clamp max minute to at least 15 and at most 90
+  const safeMax = Math.max(15, Math.min(90, maxMinute));
   const items: GoalScorerItem[] = [];
   for (let i = 0; i < count; i++) {
     const pIdx = (seedNum + i) % pool.length;
-    const mIdx = (seedNum * 2 + i * 3) % minutesList.length;
+    // Generate realistic minutes strictly less than or equal to safeMax
+    const step = Math.floor(safeMax / (count + 1));
+    const jitter = ((seedNum * (i + 1)) % Math.max(3, Math.floor(step / 2))) - 1;
+    const calcMin = Math.min(safeMax, Math.max(4, Math.floor(step * (i + 1) + jitter)));
     items.push({
       playerName: pool[pIdx],
-      minute: `${minutesList[mIdx]}'`,
+      minute: `${calcMin}'`,
     });
   }
   return items;
@@ -833,21 +901,7 @@ export function parseMatchGoalScorers(events: any[], match: any): MatchGoalScore
     }
   }
 
-  // If match has a final score > 0 but no events were parsed, use realistic scorers
-  const homeScore = match.homeScore ?? 0;
-  const awayScore = match.awayScore ?? 0;
-  const seed = simpleHash(`${match.id}-${match.homeName}-${match.awayName}`);
-
-  if (homeGoals.length === 0 && homeScore > 0) {
-    const generated = getFallbackScorers(match.homeName || '', homeScore, seed);
-    homeGoals.push(...generated);
-  }
-
-  if (awayGoals.length === 0 && awayScore > 0) {
-    const generated = getFallbackScorers(match.awayName || '', awayScore, seed + 5);
-    awayGoals.push(...generated);
-  }
-
+  // Only return authentic verified goalscorers from official API events (no demo/simulated names)
   return { homeGoals, awayGoals };
 }
 
@@ -879,6 +933,75 @@ export interface TeamFormResult {
 }
 
 const COMMON_OPPONENTS: Record<string, Array<{ name: string; logo: string }>> = {
+  bundesliga: [
+    { name: 'بوروسيا دورتموند', logo: 'https://media.api-sports.io/football/teams/165.png' },
+    { name: 'باير ليفركوزن', logo: 'https://media.api-sports.io/football/teams/168.png' },
+    { name: 'آر بي لايبزيغ', logo: 'https://media.api-sports.io/football/teams/173.png' },
+    { name: 'آينتراخت فرانكفورت', logo: 'https://media.api-sports.io/football/teams/169.png' },
+    { name: 'شتوتغارت', logo: 'https://media.api-sports.io/football/teams/172.png' },
+    { name: 'فيردر بريمن', logo: 'https://media.api-sports.io/football/teams/162.png' },
+    { name: 'يونيون برلين', logo: 'https://media.api-sports.io/football/teams/182.png' },
+    { name: 'شالكه 04', logo: 'https://media.api-sports.io/football/teams/174.png' },
+    { name: 'فولفسبورغ', logo: 'https://media.api-sports.io/football/teams/161.png' },
+    { name: 'بوروسيا مونشنغلادباخ', logo: 'https://media.api-sports.io/football/teams/163.png' },
+    { name: 'فرايبورغ', logo: 'https://media.api-sports.io/football/teams/160.png' },
+    { name: 'هيرتا برلين', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/129.png' },
+    { name: 'بايرن ميونخ', logo: 'https://media.api-sports.io/football/teams/157.png' },
+    { name: 'أوغسبورغ', logo: 'https://media.api-sports.io/football/teams/170.png' },
+  ],
+  premierLeague: [
+    { name: 'مانشستر سيتي', logo: 'https://media.api-sports.io/football/teams/50.png' },
+    { name: 'ليفربول', logo: 'https://media.api-sports.io/football/teams/40.png' },
+    { name: 'أرسنال', logo: 'https://media.api-sports.io/football/teams/42.png' },
+    { name: 'تشيلسي', logo: 'https://media.api-sports.io/football/teams/49.png' },
+    { name: 'مانشستر يونايتد', logo: 'https://media.api-sports.io/football/teams/33.png' },
+    { name: 'توتنهام هوتسبير', logo: 'https://media.api-sports.io/football/teams/47.png' },
+    { name: 'نيوكاسل يونايتد', logo: 'https://media.api-sports.io/football/teams/34.png' },
+    { name: 'أستون فيلا', logo: 'https://media.api-sports.io/football/teams/66.png' },
+  ],
+  laliga: [
+    { name: 'ريال مدريد', logo: 'https://media.api-sports.io/football/teams/541.png' },
+    { name: 'برشلونة', logo: 'https://media.api-sports.io/football/teams/529.png' },
+    { name: 'أتلتيكو مدريد', logo: 'https://media.api-sports.io/football/teams/530.png' },
+    { name: 'أتلتيك بيلباو', logo: 'https://media.api-sports.io/football/teams/531.png' },
+    { name: 'فياريال', logo: 'https://media.api-sports.io/football/teams/533.png' },
+    { name: 'ريال سوسيداد', logo: 'https://media.api-sports.io/football/teams/548.png' },
+    { name: 'إشبيلية', logo: 'https://media.api-sports.io/football/teams/536.png' },
+    { name: 'ريال بيتيس', logo: 'https://media.api-sports.io/football/teams/543.png' },
+  ],
+  serieA: [
+    { name: 'إنتر ميلان', logo: 'https://media.api-sports.io/football/teams/505.png' },
+    { name: 'ميلان', logo: 'https://media.api-sports.io/football/teams/489.png' },
+    { name: 'يوفنتوس', logo: 'https://media.api-sports.io/football/teams/496.png' },
+    { name: 'نابولي', logo: 'https://media.api-sports.io/football/teams/492.png' },
+    { name: 'أتالانتا', logo: 'https://media.api-sports.io/football/teams/499.png' },
+    { name: 'روما', logo: 'https://media.api-sports.io/football/teams/497.png' },
+    { name: 'لاتسيو', logo: 'https://media.api-sports.io/football/teams/487.png' },
+  ],
+  ligue1: [
+    { name: 'باريس سان جيرمان', logo: 'https://media.api-sports.io/football/teams/85.png' },
+    { name: 'موناكو', logo: 'https://media.api-sports.io/football/teams/91.png' },
+    { name: 'مارسيليا', logo: 'https://media.api-sports.io/football/teams/81.png' },
+    { name: 'ليون', logo: 'https://media.api-sports.io/football/teams/80.png' },
+    { name: 'ليل', logo: 'https://media.api-sports.io/football/teams/79.png' },
+  ],
+  saudi: [
+    { name: 'الهلال السعودي', logo: 'https://media.api-sports.io/football/teams/2939.png' },
+    { name: 'النصر السعودي', logo: 'https://media.api-sports.io/football/teams/2934.png' },
+    { name: 'الاتحاد السعودي', logo: 'https://media.api-sports.io/football/teams/2932.png' },
+    { name: 'الأهلي السعودي', logo: 'https://media.api-sports.io/football/teams/2938.png' },
+    { name: 'الشباب السعودي', logo: 'https://media.api-sports.io/football/teams/2937.png' },
+    { name: 'الاتفاق السعودي', logo: 'https://media.api-sports.io/football/teams/2936.png' },
+    { name: 'القادسية السعودي', logo: 'https://media.api-sports.io/football/teams/2935.png' },
+  ],
+  botola: [
+    { name: 'الوداد الرياضي', logo: 'https://media.api-sports.io/football/teams/965.png' },
+    { name: 'الرجاء الرياضي', logo: 'https://media.api-sports.io/football/teams/966.png' },
+    { name: 'الجيش الملكي', logo: 'https://media.api-sports.io/football/teams/967.png' },
+    { name: 'نهضة بركان', logo: 'https://media.api-sports.io/football/teams/968.png' },
+    { name: 'الفتح الرباطي', logo: 'https://media.api-sports.io/football/teams/969.png' },
+    { name: 'اتحاد طنجة', logo: 'https://media.api-sports.io/football/teams/971.png' },
+  ],
   brazil: [
     { name: 'فلامنغو', logo: 'https://media.api-sports.io/football/teams/127.png' },
     { name: 'بالميراس', logo: 'https://media.api-sports.io/football/teams/121.png' },
@@ -890,13 +1013,14 @@ const COMMON_OPPONENTS: Record<string, Array<{ name: string; logo: string }>> = 
     { name: 'بوتافوغو', logo: 'https://media.api-sports.io/football/teams/120.png' },
   ],
   europe: [
-    { name: 'إسبانيا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/esp.png' },
-    { name: 'إيطاليا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ita.png' },
-    { name: 'فرنسا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/fra.png' },
-    { name: 'ألمانيا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ger.png' },
-    { name: 'البرتغال', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/por.png' },
-    { name: 'هولندا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ned.png' },
-    { name: 'إنجلترا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/eng.png' },
+    { name: 'ريال مدريد', logo: 'https://media.api-sports.io/football/teams/541.png' },
+    { name: 'مانشستر سيتي', logo: 'https://media.api-sports.io/football/teams/50.png' },
+    { name: 'بايرن ميونخ', logo: 'https://media.api-sports.io/football/teams/157.png' },
+    { name: 'باريس سان جيرمان', logo: 'https://media.api-sports.io/football/teams/85.png' },
+    { name: 'برشلونة', logo: 'https://media.api-sports.io/football/teams/529.png' },
+    { name: 'إنتر ميلان', logo: 'https://media.api-sports.io/football/teams/505.png' },
+    { name: 'أرسنال', logo: 'https://media.api-sports.io/football/teams/42.png' },
+    { name: 'بوروسيا دورتموند', logo: 'https://media.api-sports.io/football/teams/165.png' },
   ],
   arab: [
     { name: 'الوداد الرياضي', logo: 'https://media.api-sports.io/football/teams/965.png' },
@@ -905,6 +1029,27 @@ const COMMON_OPPONENTS: Record<string, Array<{ name: string; logo: string }>> = 
     { name: 'النصر السعودي', logo: 'https://media.api-sports.io/football/teams/2934.png' },
     { name: 'الأهلي المصري', logo: 'https://media.api-sports.io/football/teams/1029.png' },
     { name: 'الجيش الملكي', logo: 'https://media.api-sports.io/football/teams/967.png' },
+  ],
+  superLig: [
+    { name: 'فنربخشة', logo: 'https://media.api-sports.io/football/teams/611.png' },
+    { name: 'بشكتاش', logo: 'https://media.api-sports.io/football/teams/564.png' },
+    { name: 'طرابزون سبور', logo: 'https://media.api-sports.io/football/teams/1010.png' },
+    { name: 'إسطنبول باشاك شهير', logo: 'https://media.api-sports.io/football/teams/1004.png' },
+    { name: 'غلطة سراي', logo: 'https://media.api-sports.io/football/teams/645.png' },
+  ],
+  nationalTeams: [
+    { name: 'المغرب', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/mar.png' },
+    { name: 'فرنسا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/fra.png' },
+    { name: 'الأرجنتين', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/arg.png' },
+    { name: 'إسبانيا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/esp.png' },
+    { name: 'البرازيل', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/bra.png' },
+    { name: 'إنجلترا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/eng.png' },
+    { name: 'ألمانيا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ger.png' },
+    { name: 'البرتغال', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/por.png' },
+    { name: 'إيطاليا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ita.png' },
+    { name: 'هولندا', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ned.png' },
+    { name: 'السعودية', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/ksa.png' },
+    { name: 'مصر', logo: 'https://a.espncdn.com/i/teamlogos/countries/500/egy.png' },
   ],
 };
 
@@ -918,7 +1063,91 @@ export function getTeamRecentForm(
 
   let pool = COMMON_OPPONENTS.europe;
   const tLower = teamName.toLowerCase();
-  if (
+  const cLower = competitionName.toLowerCase();
+
+  // Check if international / national tournament strictly (never match club European competitions like UEFA Champions League or Europa)
+  const isNationalTournament =
+    cLower.includes('world cup') ||
+    cLower.includes('كأس العالم') ||
+    cLower.includes('uefa euro') ||
+    cLower.includes('كأس أمم أوروبا') ||
+    (cLower.includes('euro') && !cLower.includes('league') && !cLower.includes('europa') && !cLower.includes('champion') && !cLower.includes('أوروبا') && !cLower.includes('europe')) ||
+    cLower.includes('يورو') ||
+    cLower.includes('afcon') ||
+    cLower.includes('أمم أفريقيا') ||
+    cLower.includes('nations league') ||
+    cLower.includes('qualif') ||
+    cLower.includes('تصفيات') ||
+    cLower.includes('ودية دولية') ||
+    cLower.includes('friendlies');
+
+  if (isNationalTournament) {
+    pool = COMMON_OPPONENTS.nationalTeams;
+  } else if (
+    tLower.includes('galatasaray') ||
+    tLower.includes('غلطة سراي') ||
+    tLower.includes('fenerbahce') ||
+    tLower.includes('فنربخشة') ||
+    cLower.includes('süper lig') ||
+    cLower.includes('super lig') ||
+    cLower.includes('تركي')
+  ) {
+    pool = COMMON_OPPONENTS.superLig;
+  } else if (
+    cLower.includes('bundesliga') ||
+    cLower.includes('ألماني') ||
+    cLower.includes('germany') ||
+    tLower.includes('bayern') ||
+    tLower.includes('dortmund') ||
+    tLower.includes('leverkusen') ||
+    tLower.includes('augsburg') ||
+    tLower.includes('leipzig') ||
+    tLower.includes('بايرن') ||
+    tLower.includes('أوغسبورغ')
+  ) {
+    pool = COMMON_OPPONENTS.bundesliga;
+  } else if (
+    cLower.includes('premier') ||
+    cLower.includes('إنجليزي') ||
+    cLower.includes('england') ||
+    tLower.includes('city') ||
+    tLower.includes('liverpool') ||
+    tLower.includes('arsenal') ||
+    tLower.includes('chelsea') ||
+    tLower.includes('united')
+  ) {
+    pool = COMMON_OPPONENTS.premierLeague;
+  } else if (
+    cLower.includes('la liga') ||
+    cLower.includes('إسباني') ||
+    cLower.includes('spain') ||
+    tLower.includes('madrid') ||
+    tLower.includes('barcelona') ||
+    tLower.includes('برشلونة') ||
+    tLower.includes('مدريد')
+  ) {
+    pool = COMMON_OPPONENTS.laliga;
+  } else if (
+    cLower.includes('serie a') ||
+    cLower.includes('إيطالي') ||
+    cLower.includes('italy') ||
+    tLower.includes('inter') ||
+    tLower.includes('milan') ||
+    tLower.includes('juventus') ||
+    tLower.includes('إنتر') ||
+    tLower.includes('ميلان')
+  ) {
+    pool = COMMON_OPPONENTS.serieA;
+  } else if (
+    cLower.includes('ligue 1') ||
+    cLower.includes('فرنسي') ||
+    cLower.includes('france') ||
+    tLower.includes('psg') ||
+    tLower.includes('paris') ||
+    tLower.includes('مارسيليا')
+  ) {
+    pool = COMMON_OPPONENTS.ligue1;
+  } else if (
     isBrazilianClubName(teamName) ||
     tLower.includes('brazil') ||
     tLower.includes('corinthians') ||
@@ -926,17 +1155,34 @@ export function getTeamRecentForm(
   ) {
     pool = COMMON_OPPONENTS.brazil;
   } else if (
+    cLower.includes('saudi') ||
+    cLower.includes('سعودي') ||
+    cLower.includes('روشن') ||
+    tLower.includes('الهلال') ||
+    tLower.includes('النصر') ||
+    tLower.includes('الاتحاد')
+  ) {
+    pool = COMMON_OPPONENTS.saudi;
+  } else if (
+    cLower.includes('botola') ||
+    cLower.includes('المغربي') ||
+    tLower.includes('الوداد') ||
+    tLower.includes('الرجاء') ||
+    tLower.includes('الجيش الملكي')
+  ) {
+    pool = COMMON_OPPONENTS.botola;
+  } else if (
     tLower.includes('morocco') ||
     tLower.includes('المغرب') ||
     tLower.includes('saudi') ||
-    tLower.includes('الهلال') ||
-    tLower.includes('النصر') ||
-    tLower.includes('الوداد') ||
-    tLower.includes('الرجاء') ||
     tLower.includes('الأهلي')
   ) {
     pool = COMMON_OPPONENTS.arab;
   }
+
+  // Filter out the team itself from the opponents pool so it never plays against itself
+  const filteredPool = pool.filter((opp) => !opp.name.includes(teamName) && !teamName.includes(opp.name));
+  const activePool = filteredPool.length >= 5 ? filteredPool : pool;
 
   // Pre-determined deterministic realistic outcomes
   const possiblePatterns: Array<Array<{ r: 'W' | 'D' | 'L'; hS: number; aS: number }>> = [
@@ -974,7 +1220,7 @@ export function getTeamRecentForm(
   let goalsConceded = 0;
 
   for (let i = 0; i < 5; i++) {
-    const opp = pool[(hash + i) % pool.length];
+    const opp = activePool[(hash + i) % activePool.length];
     const pat = pattern[i];
     const isTeamHost = (hash + i) % 2 === 0;
 
@@ -1044,77 +1290,24 @@ export interface H2HResult {
 }
 
 export function getPreMatchH2H(
-  homeName: string,
-  awayName: string,
-  competitionName = 'المسابقات الرسمية'
+  _homeName: string,
+  _awayName: string,
+  _competitionName = 'المسابقات الرسمية'
 ): H2HResult {
-  const hash = simpleHash(homeName + awayName);
-
-  const pastEncounters: Array<{ hS: number; aS: number; comp: string; date: string }> = [
-    { hS: 1, aS: 1, comp: competitionName, date: '15/05/2026' },
-    { hS: 2, aS: 1, comp: competitionName, date: '08/11/2025' },
-    { hS: 0, aS: 1, comp: 'كأس البطولة', date: '21/04/2025' },
-    { hS: 2, aS: 2, comp: competitionName, date: '19/10/2024' },
-    { hS: 1, aS: 0, comp: competitionName, date: '04/06/2024' },
-  ];
-
-  let homeWins = 0;
-  let draws = 0;
-  let awayWins = 0;
-
-  const matches: H2HMatchItem[] = [];
-
-  for (let i = 0; i < pastEncounters.length; i++) {
-    const enc = pastEncounters[i];
-    // Slightly permute scores based on hash
-    let hS = enc.hS;
-    let aS = enc.aS;
-    if (i === 0 && hash % 3 === 0) {
-      hS = 2;
-      aS = 0;
-    } else if (i === 1 && hash % 2 === 0) {
-      hS = 1;
-      aS = 2;
-    }
-
-    let winner: 'home' | 'away' | 'draw' = 'draw';
-    if (hS > aS) {
-      winner = 'home';
-      homeWins++;
-    } else if (aS > hS) {
-      winner = 'away';
-      awayWins++;
-    } else {
-      draws++;
-    }
-
-    matches.push({
-      date: enc.date,
-      competition: enc.comp,
-      homeTeam: i % 2 === 0 ? homeName : awayName,
-      awayTeam: i % 2 === 0 ? awayName : homeName,
-      homeScore: hS,
-      awayScore: aS,
-      winner,
-    });
-  }
-
-  const total = matches.length;
-  const homeWinPct = Math.round((homeWins / total) * 100);
-  const drawPct = Math.round((draws / total) * 100);
-  const awayWinPct = 100 - homeWinPct - drawPct;
-
+  // Never synthesize fake future encounters like 2026 or fake cup titles.
+  // When no previous official meetings exist on record in recent seasons, return empty matches
+  // so the UI can truthfully state that there are no recent recorded encounters.
   return {
     summary: {
-      homeWins,
-      draws,
-      awayWins,
-      total,
-      homeWinPct,
-      drawPct,
-      awayWinPct,
+      homeWins: 0,
+      draws: 0,
+      awayWins: 0,
+      total: 0,
+      homeWinPct: 0,
+      drawPct: 0,
+      awayWinPct: 0,
     },
-    matches,
+    matches: [],
   };
 }
 

@@ -45,11 +45,20 @@ router.get("/clean-embed", asyncHandler(async (req, res) => {
     let html = await response.text();
 
     // 1. Strip all popup ad networks, trackers, and clickjackers
+    html = html.replace(/<script[\s\S]*?clearonclick[\s\S]*?<\/script>/gi, "<!-- clearonclick-stripped -->");
+    html = html.replace(/<script[\s\S]*?aclib[\s\S]*?<\/script>/gi, "<!-- aclib-stripped -->");
+    html = html.replace(/<script[\s\S]*?acscdn[\s\S]*?<\/script>/gi, "<!-- acscdn-stripped -->");
+    html = html.replace(/<script[\s\S]*?__cxwwzo[\s\S]*?<\/script>/gi, "<!-- cxwwzo-stripped -->");
     html = html.replace(/<script[\s\S]*?extancecompert[\s\S]*?<\/script>/gi, "<!-- ad-stripped -->");
     html = html.replace(/<script[\s\S]*?boredflix[\s\S]*?<\/script>/gi, "<!-- analytics-stripped -->");
     html = html.replace(/<script[\s\S]*?googlesyndication[\s\S]*?<\/script>/gi, "<!-- adsense-stripped -->");
     html = html.replace(/<script[\s\S]*?upwafts[\s\S]*?<\/script>/gi, "<!-- popunder-stripped -->");
     html = html.replace(/<script[\s\S]*?__moSandbox[\s\S]*?<\/script>/gi, "<!-- sandbox-detector-stripped -->");
+    html = html.replace(/<script[\s\S]*?mosb[\s\S]*?<\/script>/gi, "<!-- sandbox-banner-stripped -->");
+    html = html.replace(/<script[\s\S]*?window\.__moSandbox[\s\S]*?<\/script>/gi, "<!-- sandbox-check-stripped -->");
+    html = html.replace(/<script[\s\S]*?249903[\s\S]*?<\/script>/gi, "<!-- popup-zone-stripped -->");
+    html = html.replace(/<script[\s\S]*?last=0,done=false[\s\S]*?<\/script>/gi, "<!-- click-hijack-stripped -->");
+    html = html.replace(/<script[\s\S]*?umami[\s\S]*?<\/script>/gi, "<!-- umami-stripped -->");
     html = html.replace(/<script[\s\S]*?frubth[\s\S]*?<\/script>/gi, "<!-- ad-burst-stripped -->");
 
     // 2. Add base tag so assets (styles, Hls.js, svgs) resolve to matchora.to
@@ -61,7 +70,10 @@ router.get("/clean-embed", asyncHandler(async (req, res) => {
     // 3. Rewrite /api/play/ calls to our backend proxy to bypass CORS
     html = html.replace(/\/api\/play\//g, "/api/streams/play-proxy/");
 
-    // 4. Inject strict anti-popup defense directly inside the player
+    // 4. Ensure video has playsinline and webkit-playsinline for iOS/Safari
+    html = html.replace(/<video id="v"/i, '<video id="v" playsinline webkit-playsinline');
+
+    // 5. Inject strict anti-popup defense & mobile autoplay unlock directly inside the player
     const antiPopupScript = `
       <script>
         // Completely neutralize window.open popup ads
@@ -74,6 +86,31 @@ router.get("/clean-embed", asyncHandler(async (req, res) => {
             e.stopPropagation();
           }
         }, true);
+
+        // Mobile Safari autoplay unlock: ensure video starts playing smoothly
+        (function() {
+          function unlockPlayback() {
+            var v = document.getElementById('v');
+            if (v && v.paused) {
+              v.play().catch(function() {
+                v.muted = true;
+                v.play().catch(function() {});
+              });
+            }
+          }
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', unlockPlayback);
+          } else {
+            unlockPlayback();
+          }
+          // On any user tap, unmute if muted
+          window.addEventListener('touchstart', function() {
+            var v = document.getElementById('v');
+            if (v && v.muted) {
+              v.muted = false;
+            }
+          }, { once: true });
+        })();
       </script>
     `;
     html = html.replace("</head>", `${antiPopupScript}</head>`);

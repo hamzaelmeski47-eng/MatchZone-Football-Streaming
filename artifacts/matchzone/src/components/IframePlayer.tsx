@@ -8,7 +8,8 @@ export interface IframePlayerProps {
   onSwitchNext?: () => void;
 }
 
-export function IframePlayer({ src, title, onError, onSwitchNext }: IframePlayerProps) {
+export function IframePlayer({ src, title, onError, 
+  onSwitchNext }: IframePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +27,22 @@ export function IframePlayer({ src, title, onError, onSwitchNext }: IframePlayer
       console.log('[MatchZone] Neutralized popup window:', args[0]);
       return null;
     };
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const link = target?.closest?.('a');
+      if (link && link.target === '_blank' && !link.href.includes(window.location.host)) {
+        console.log('[MatchZone] Blocked untrusted target=_blank redirect:', link.href);
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+
     return () => {
       window.open = originalOpen;
+      window.removeEventListener('click', handleGlobalClick, true);
     };
   }, []);
 
@@ -205,7 +220,6 @@ export function IframePlayer({ src, title, onError, onSwitchNext }: IframePlayer
       {/* Responsive Video Player Iframe */}
       {(() => {
         // Ensure Matchora embed URLs always use valid /embed/match/{eventId}?ch={channelId} format.
-        // Standalone /embed/channel/{id} triggers "Channel unavailable, use the embed: matchora.to/developers".
         let cleanSrc = src;
         const chDirectMatch = cleanSrc.match(/matchora\.to\/embed\/channel\/([0-9a-zA-Z_-]+)/i);
         if (chDirectMatch && chDirectMatch[1]) {
@@ -215,18 +229,24 @@ export function IframePlayer({ src, title, onError, onSwitchNext }: IframePlayer
           }
         }
 
+        // Route Matchora embeds through clean-embed endpoint to strip all popup ads, trackers and auto-play blockers
+        const finalPlayerSrc = cleanSrc.includes('matchora.to')
+          ? `/api/streams/clean-embed?url=${encodeURIComponent(cleanSrc)}`
+          : cleanSrc;
+
         return (
           <>
             <iframe
               key={`${key}-${cleanSrc}`}
               ref={iframeRef}
-              src={cleanSrc}
+              src={finalPlayerSrc}
               title={title || 'Live Stream'}
               width="100%"
               height="100%"
               frameBorder="0"
               scrolling="no"
-              allow="autoplay; fullscreen; encrypted-media"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
               allowFullScreen
               onLoad={() => setLoading(false)}
               onError={() => {

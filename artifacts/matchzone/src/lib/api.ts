@@ -2,7 +2,7 @@ import type { Competition, Match, Team } from './mock-data';
 import { SUPPORTED_COMPETITIONS } from './competitions.config';
 import { getArabicTeamName } from './arabic-helpers';
 import { formatCompetitionInfo, normalizeCompetitionName } from './competitions-map';
-import { resolveMatchStadium, isBrazilianMatch } from './match-details-helpers';
+import { resolveMatchStadium, isBrazilianMatch, type TeamFormResult, type H2HResult } from './match-details-helpers';
 
 const API_BASE = '/api';
 const TOKEN_KEY = 'matchzone-token';
@@ -950,6 +950,38 @@ export async function loadRealMatchStatistics(matchId: string | number): Promise
     return statistics || [];
   } catch {
     return [];
+  }
+}
+
+export async function loadMatchFormAndH2H(
+  matchId: string | number,
+  homeName?: string,
+  awayName?: string,
+  competitionName?: string
+): Promise<{
+  homeForm: TeamFormResult | null;
+  awayForm: TeamFormResult | null;
+  h2h: H2HResult | null;
+}> {
+  try {
+    const params = new URLSearchParams();
+    if (homeName) params.set('home', homeName);
+    if (awayName) params.set('away', awayName);
+    if (competitionName) params.set('competition', competitionName);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    const res = await request<{
+      homeForm: TeamFormResult | null;
+      awayForm: TeamFormResult | null;
+      h2h: H2HResult | null;
+    }>(`/football/matches/${matchId}/form${qs}`);
+    return {
+      homeForm: res?.homeForm || null,
+      awayForm: res?.awayForm || null,
+      h2h: res?.h2h || null,
+    };
+  } catch (err) {
+    console.warn('[MatchZone] Failed to load real match form & H2H:', err);
+    return { homeForm: null, awayForm: null, h2h: null };
   }
 }
 

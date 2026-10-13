@@ -1021,7 +1021,8 @@ export async function getEspnMatchEvents(matchId: number | string): Promise<ApiF
   const summary = await getEspnMatchSummary(matchId);
   if (!summary) return [];
 
-  const keyEvents = summary.keyEvents || summary.plays || [];
+  const rawDetails = summary.header?.competitions?.[0]?.details || [];
+  const rawKeyEvents = summary.keyEvents || summary.plays || [];
   const competitors = summary.header?.competitions?.[0]?.competitors || [];
   const teamLogoMap = new Map<string, { id: number; name: string; logo: string }>();
   for (const c of competitors) {
@@ -1032,7 +1033,59 @@ export async function getEspnMatchEvents(matchId: number | string): Promise<ApiF
   }
 
   const events: ApiFootballEvent[] = [];
-  for (const k of keyEvents) {
+  const seenGoalKeys = new Set<string>();
+
+  // 1. Process official ESPN scoring details (100% authentic goals with real scorers)
+  for (const d of rawDetails) {
+    if (d.scoringPlay || d.penaltyKick || d.ownGoal) {
+      let elapsed = 0;
+      let extra: number | null = null;
+      if (d.clock?.displayValue) {
+        const parts = String(d.clock.displayValue).replace(/'/g, "").split("+");
+        if (parts[0]) elapsed = parseInt(parts[0], 10) || 0;
+        if (parts[1]) extra = parseInt(parts[1], 10) || null;
+      } else if (d.clock?.value) {
+        elapsed = Math.floor(d.clock.value / 60);
+      }
+
+      const tId = String(d.team?.id || "");
+      const teamInfo = teamLogoMap.get(tId);
+      const athlete = d.participants?.[0]?.athlete;
+      const playerName = athlete?.displayName || athlete?.shortName || "هدف";
+      const assistAthlete = d.participants?.[1]?.athlete;
+      const assistName = assistAthlete?.displayName || assistAthlete?.shortName || null;
+
+      let detail = "Goal";
+      if (d.ownGoal) detail = "Own Goal";
+      else if (d.penaltyKick) detail = "Penalty";
+
+      const goalKey = `${elapsed}-${tId}-${playerName}`;
+      seenGoalKeys.add(goalKey);
+
+      events.push({
+        time: { elapsed, extra },
+        team: {
+          id: teamInfo?.id || parseInt(tId, 10) || 0,
+          name: teamInfo?.name || d.team?.displayName || d.team?.name || "فريق",
+          logo: teamInfo?.logo || d.team?.logos?.[0]?.href || "",
+        },
+        player: {
+          id: parseInt(athlete?.id || "0", 10) || null,
+          name: playerName,
+        },
+        assist: {
+          id: parseInt(assistAthlete?.id || "0", 10) || null,
+          name: assistName,
+        },
+        type: "Goal",
+        detail,
+        comments: null,
+      });
+    }
+  }
+
+  // 2. Process keyEvents (cards, substitutions, VAR, and additional goals)
+  for (const k of rawKeyEvents) {
     const rawType = (k.type?.text || k.type?.type || "").toLowerCase();
     const isGoal = rawType.includes("goal") || Boolean(k.scoringPlay);
     const isCard = rawType.includes("card");
@@ -1042,12 +1095,6 @@ export async function getEspnMatchEvents(matchId: number | string): Promise<ApiF
     if (!isGoal && !isCard && !isSub && !isVar) {
       continue;
     }
-
-    let type = "Goal";
-    if (isCard) type = "Card";
-    else if (isSub) type = "subst";
-    else if (isVar) type = "var";
-    else if (isGoal) type = "Goal";
 
     let elapsed = 0;
     let extra: number | null = null;
@@ -1061,6 +1108,19 @@ export async function getEspnMatchEvents(matchId: number | string): Promise<ApiF
 
     const tId = String(k.team?.id || "");
     const teamInfo = teamLogoMap.get(tId);
+    const athlete = k.participants?.[0]?.athlete;
+    const playerName = athlete?.displayName || athlete?.shortName || k.shortText || null;
+
+    if (isGoal) {
+      const goalKey = `${elapsed}-${tId}-${playerName}`;
+      if (seenGoalKeys.has(goalKey)) continue;
+      seenGoalKeys.add(goalKey);
+    }
+
+    let type = "Goal";
+    if (isCard) type = "Card";
+    else if (isSub) type = "subst";
+    else if (isVar) type = "var";
 
     events.push({
       time: { elapsed, extra },
@@ -1070,8 +1130,8 @@ export async function getEspnMatchEvents(matchId: number | string): Promise<ApiF
         logo: teamInfo?.logo || k.team?.logos?.[0]?.href || "",
       },
       player: {
-        id: parseInt(k.participants?.[0]?.athlete?.id || "0", 10) || null,
-        name: k.participants?.[0]?.athlete?.displayName || k.participants?.[0]?.athlete?.shortName || k.shortText || null,
+        id: parseInt(athlete?.id || "0", 10) || null,
+        name: playerName,
       },
       assist: k.participants?.[1]?.athlete
         ? {
@@ -1319,5 +1379,731 @@ export function generateFallbackStatistics(
       ],
     },
   ];
+}
+
+// -------------------------------------------------------------
+// REAL TEAM RECENT FORM & H2H (LAST 5 MATCHES) FROM ESPN API
+// -------------------------------------------------------------
+
+export interface RealFormMatchItem {
+  date: string;
+  rawDate?: string;
+  opponent: string;
+  opponentLogo: string;
+  result: "W" | "D" | "L";
+  score: string;
+  competition: string;
+  isHome: boolean;
+}
+
+export interface RealTeamFormResult {
+  teamName: string;
+  matches: RealFormMatchItem[];
+  formBadges: Array<"W" | "D" | "L">;
+  stats: {
+    wins: number;
+    draws: number;
+    losses: number;
+    goalsScored: number;
+    goalsConceded: number;
+  };
+}
+
+export interface RealH2HMatchItem {
+  date: string;
+  competition: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  winner: "home" | "away" | "draw";
+}
+
+export interface RealH2HResult {
+  summary: {
+    homeWins: number;
+    draws: number;
+    awayWins: number;
+    total: number;
+    homeWinPct: number;
+    drawPct: number;
+    awayWinPct: number;
+  };
+  matches: RealH2HMatchItem[];
+}
+
+const ARABIC_CLUB_NAMES: Record<string, string> = {
+  // German Bundesliga
+  "fc augsburg": "أوغسبورغ",
+  "augsburg": "أوغسبورغ",
+  "bayern munich": "بايرن ميونخ",
+  "borussia dortmund": "بوروسيا دورتموند",
+  "bayer leverkusen": "باير ليفركوزن",
+  "rb leipzig": "آر بي لايبزيغ",
+  "eintracht frankfurt": "آينتراخت فرانكفورت",
+  "vfb stuttgart": "شتوتغارت",
+  "werder bremen": "فيردر بريمن",
+  "1. fc union berlin": "يونيون برلين",
+  "union berlin": "يونيون برلين",
+  "schalke 04": "شالكه 04",
+  "hertha berlin": "هيرتا برلين",
+  "hertha bsc": "هيرتا برلين",
+  "vfl wolfsburg": "فولفسبورغ",
+  "wolfsburg": "فولفسبورغ",
+  "borussia monchengladbach": "بوروسيا مونشنغلادباخ",
+  "sc freiburg": "فرايبورغ",
+  "freiburg": "فرايبورغ",
+  "tsg hoffenheim": "هوفنهايم",
+  "hoffenheim": "هوفنهايم",
+  "mainz": "ماينتس",
+  "1. fsv mainz 05": "ماينتس",
+  "1. fc heidenheim 1846": "هايدنهايم",
+  "heidenheim": "هايدنهايم",
+  "sv elversberg": "إلفيرسبرغ",
+  "vfl osnabruck": "أوسنابروك",
+  "bodo/glimt": "بودو/غليمت",
+
+  // English Premier League
+  "manchester city": "مانشستر سيتي",
+  "liverpool": "ليفربول",
+  "arsenal": "أرسنال",
+  "chelsea": "تشيلسي",
+  "manchester united": "مانشستر يونايتد",
+  "tottenham hotspur": "توتنهام",
+  "tottenham": "توتنهام",
+  "newcastle united": "نيوكاسل",
+  "newcastle": "نيوكاسل",
+  "aston villa": "أستون فيلا",
+  "west ham united": "وست هام",
+  "brighton": "برايتون",
+
+  // Spanish La Liga
+  "real madrid": "ريال مدريد",
+  "barcelona": "برشلونة",
+  "atletico madrid": "أتلتيكو مدريد",
+  "athletic bilbao": "أتلتيك بيلباو",
+  "athletic club": "أتلتيك بيلباو",
+  "villarreal": "فياريال",
+  "real sociedad": "ريال سوسيداد",
+  "sevilla": "إشبيلية",
+  "real betis": "ريال بيتيس",
+  "girona": "جيرونا",
+  "valencia": "فالنسيا",
+
+  // Italian Serie A
+  "inter milan": "إنتر ميلان",
+  "inter": "إنتر ميلان",
+  "ac milan": "ميلان",
+  "milan": "ميلان",
+  "juventus": "يوفنتوس",
+  "napoli": "نابولي",
+  "atalanta": "أتالانتا",
+  "roma": "روما",
+  "as roma": "روما",
+  "lazio": "لاتسيو",
+  "fiorentina": "فيورنتينا",
+
+  // French Ligue 1
+  "paris saint-germain": "باريس سان جيرمان",
+  "paris saint germain": "باريس سان جيرمان",
+  "psg": "باريس سان جيرمان",
+  "monaco": "موناكو",
+  "as monaco": "موناكو",
+  "marseille": "مارسيليا",
+  "olympique marseille": "مارسيليا",
+  "lyon": "ليون",
+  "olympique lyonnais": "ليون",
+  "lille": "ليل",
+
+  // Moroccan Botola Pro
+  "wydad ac": "الوداد الرياضي",
+  "wydad casablanca": "الوداد الرياضي",
+  "raja ca": "الرجاء الرياضي",
+  "raja casablanca": "الرجاء الرياضي",
+  "as far": "الجيش الملكي",
+  "far rabat": "الجيش الملكي",
+  "rs berkane": "نهضة بركان",
+  "fus rabat": "الفتح الرباطي",
+  "mas fes": "المغرب الفاسي",
+  "irt tanger": "اتحاد طنجة",
+  "ittihad tanger": "اتحاد طنجة",
+  "husa agadir": "حسنية أكادير",
+
+  // Saudi Pro League
+  "al hilal": "الهلال السعودي",
+  "al-hilal": "الهلال السعودي",
+  "al nassr": "النصر السعودي",
+  "al-nassr": "النصر السعودي",
+  "al ittihad": "الاتحاد السعودي",
+  "al-ittihad": "الاتحاد السعودي",
+  "al ahli": "الأهلي السعودي",
+  "al-ahli": "الأهلي السعودي",
+  "al shabab": "الشباب السعودي",
+  "al ettifaq": "الاتفاق السعودي",
+  "al qadsiah": "القادسية السعودي",
+  "al taawoun": "التعاون السعودي",
+
+  // Egyptian League
+  "al ahly": "الأهلي المصري",
+  "zamalek": "الزمالك",
+  "pyramids": "بيراميدز",
+};
+
+const ARABIC_TO_ENGLISH_SEARCH_MAP: Record<string, string> = {
+  // Spanish La Liga
+  "برشلونة": "Barcelona",
+  "ريال مدريد": "Real Madrid",
+  "أتلتيكو مدريد": "Atletico Madrid",
+  "اتلتيكو مدريد": "Atletico Madrid",
+  "أتلتيك بلباو": "Athletic Club",
+  "أتلتيك بيلباو": "Athletic Club",
+  "اتلتيك بلباو": "Athletic Club",
+  "فياريال": "Villarreal",
+  "ريال سوسيداد": "Real Sociedad",
+  "إشبيلية": "Sevilla",
+  "اشبيلية": "Sevilla",
+  "ريال بيتيس": "Real Betis",
+  "جيرونا": "Girona",
+  "فالنسيا": "Valencia",
+  "سيلتا فيغو": "Celta Vigo",
+  "سلتا فيغو": "Celta Vigo",
+  "أوساسونا": "Osasuna",
+  "خيتافي": "Getafe",
+  "إسبانيول": "Espanyol",
+  "مايوركا": "Mallorca",
+  "رايو فاليكانو": "Rayo Vallecano",
+  "بلد الوليد": "Real Valladolid",
+  "ليغانيس": "Leganes",
+  "ألافيس": "Alaves",
+  "لاس بالماس": "Las Palmas",
+
+  // Turkish Süper Lig
+  "غلطة سراي": "Galatasaray",
+  "غالاطاسراي": "Galatasaray",
+  "فنربخشة": "Fenerbahce",
+  "فنربغشة": "Fenerbahce",
+  "بشكتاش": "Besiktas",
+  "طرابزون سبور": "Trabzonspor",
+  "إسطنبول باشاك شهير": "Istanbul Basaksehir",
+
+  // English Premier League
+  "مانشستر سيتي": "Manchester City",
+  "مان سيتي": "Manchester City",
+  "مانشستر يونايتد": "Manchester United",
+  "مان يونايتد": "Manchester United",
+  "ليفربول": "Liverpool",
+  "أرسنال": "Arsenal",
+  "آرسنال": "Arsenal",
+  "تشيلسي": "Chelsea",
+  "توتنهام": "Tottenham Hotspur",
+  "توتنهام هوتسبير": "Tottenham Hotspur",
+  "نيوكاسل": "Newcastle United",
+  "نيوكاسل يونايتد": "Newcastle United",
+  "أستون فيلا": "Aston Villa",
+  "وست هام": "West Ham",
+  "وست هام يونايتد": "West Ham",
+  "برايتون": "Brighton",
+  "إيفرتون": "Everton",
+  "فولهام": "Fulham",
+  "بورنموث": "Bournemouth",
+  "كريستال بالاس": "Crystal Palace",
+  "برينتفورد": "Brentford",
+  "نوتينغهام فورست": "Nottingham Forest",
+  "ليستر سيتي": "Leicester City",
+  "ساوثهامبتون": "Southampton",
+  "إبسويتش": "Ipswich Town",
+  "ولفرهامبتون": "Wolverhampton Wanderers",
+
+  // German Bundesliga
+  "بايرن ميونخ": "Bayern Munich",
+  "بوروسيا دورتموند": "Borussia Dortmund",
+  "دورتموند": "Borussia Dortmund",
+  "باير ليفركوزن": "Bayer Leverkusen",
+  "ليفركوزن": "Bayer Leverkusen",
+  "لايبزيغ": "RB Leipzig",
+  "آر بي لايبزيغ": "RB Leipzig",
+  "آينتراخت فرانكفورت": "Eintracht Frankfurt",
+  "شتوتغارت": "Stuttgart",
+  "فولفسبورغ": "Wolfsburg",
+  "بوروسيا مونشنغلادباخ": "Borussia Monchengladbach",
+  "فيردر بريمن": "Werder Bremen",
+  "فرايبورغ": "Freiburg",
+  "ماينز": "Mainz",
+  "يونيون برلين": "Union Berlin",
+  "هايدنهايم": "Heidenheim",
+  "أوغسبورغ": "Augsburg",
+  "هوفنهايم": "Hoffenheim",
+  "سانت باولي": "St. Pauli",
+  "بوخوم": "Bochum",
+
+  // Italian Serie A
+  "إنتر ميلان": "Inter Milan",
+  "إنتر": "Inter Milan",
+  "انتر": "Inter Milan",
+  "ميلان": "AC Milan",
+  "إيه سي ميلان": "AC Milan",
+  "يوفنتوس": "Juventus",
+  "نابولي": "Napoli",
+  "روما": "AS Roma",
+  "لاتسيو": "Lazio",
+  "أتالانتا": "Atalanta",
+  "فيورنتينا": "Fiorentina",
+  "بولونيا": "Bologna",
+  "تورينو": "Torino",
+
+  // French Ligue 1
+  "باريس سان جيرمان": "Paris Saint-Germain",
+  "باريس": "Paris Saint-Germain",
+  "موناكو": "Monaco",
+  "مارسيليا": "Marseille",
+  "ليون": "Lyon",
+  "ليل": "Lille",
+  "نيس": "Nice",
+  "لانس": "Lens",
+  "رين": "Rennes",
+  "ستاد رين": "Rennes",
+  "بريست": "Brest",
+
+  // Saudi Pro League
+  "الهلال": "Al Hilal",
+  "الهلال السعودي": "Al Hilal",
+  "النصر": "Al Nassr",
+  "النصر السعودي": "Al Nassr",
+  "الاتحاد": "Al Ittihad",
+  "الاتحاد السعودي": "Al Ittihad",
+  "الأهلي السعودي": "Al Ahli",
+  "الشباب": "Al Shabab",
+  "الاتفاق": "Al Ettifaq",
+  "القادسية": "Al Qadsiah",
+  "التعاون": "Al Taawoun",
+
+  // Moroccan Botola Pro
+  "الوداد": "Wydad Casablanca",
+  "الوداد الرياضي": "Wydad Casablanca",
+  "الوداد البيضاوي": "Wydad Casablanca",
+  "الرجاء": "Raja Casablanca",
+  "الرجاء الرياضي": "Raja Casablanca",
+  "الرجاء البيضاوي": "Raja Casablanca",
+  "الجيش الملكي": "AS FAR",
+  "نهضة بركان": "RS Berkane",
+  "الفتح الرباطي": "FUS Rabat",
+  "اتحاد طنجة": "Ittihad Tanger",
+  "المغرب الفاسي": "MAS Fes",
+  "حسنية أكادير": "Hassania Agadir",
+
+  // Egyptian Premier League
+  "الأهلي": "Al Ahly",
+  "الأهلي المصري": "Al Ahly",
+  "الزمالك": "Zamalek",
+  "بيراميدز": "Pyramids FC",
+
+  // Other European Clubs
+  "بنفيكا": "Benfica",
+  "بورتو": "Porto",
+  "سبورتينغ لشبونة": "Sporting CP",
+  "أياكس": "Ajax",
+  "فاينورد": "Feyenoord",
+  "بي إس في آيندهوفن": "PSV Eindhoven",
+  "سيلتيك": "Celtic",
+  "رينجرز": "Rangers",
+};
+
+export function resolveTeamEnglishSearchName(rawName?: string): string {
+  if (!rawName) return "";
+  const trimmed = rawName.trim();
+  const hasArabic = /[\u0600-\u06FF]/.test(trimmed);
+
+  if (hasArabic) {
+    if (ARABIC_TO_ENGLISH_SEARCH_MAP[trimmed]) {
+      return ARABIC_TO_ENGLISH_SEARCH_MAP[trimmed];
+    }
+    for (const [ar, en] of Object.entries(ARABIC_TO_ENGLISH_SEARCH_MAP)) {
+      if (trimmed.includes(ar) || ar.includes(trimmed)) {
+        return en;
+      }
+    }
+    for (const [en, ar] of Object.entries(ARABIC_CLUB_NAMES)) {
+      if (trimmed.includes(ar) || ar.includes(trimmed)) {
+        return en;
+      }
+    }
+  }
+
+  return trimmed;
+}
+
+function formatArabicRelativeDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    const day = d.getDate().toString().padStart(2, "0");
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return dateStr;
+  }
+}
+
+// In-memory cache for real team form (30 minutes TTL)
+const teamFormCache = new Map<string, { data: RealTeamFormResult; timestamp: number }>();
+const H2H_CACHE = new Map<string, { data: RealH2HResult; timestamp: number }>();
+const TEAM_FORM_CACHE_TTL_MS = 30 * 60 * 1000;
+
+export async function fetchRealTeamRecentForm(
+  teamName: string,
+  _teamLogo?: string
+): Promise<RealTeamFormResult | null> {
+  const cleanKey = teamName.toLowerCase().trim();
+  const cached = teamFormCache.get(cleanKey);
+  if (cached && Date.now() - cached.timestamp < TEAM_FORM_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  try {
+    const englishSearchName = resolveTeamEnglishSearchName(teamName);
+
+    // 1. Search ESPN for team
+    const searchUrl = `https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(
+      englishSearchName
+    )}&limit=5&type=team`;
+    const searchRes = await fetch(searchUrl, { headers: { "User-Agent": "MatchZone/1.0" } });
+    if (!searchRes.ok) return null;
+    const searchData = (await searchRes.json()) as any;
+    let teamItem =
+      searchData.items?.find((it: any) => it.type === "team" && it.sport === "soccer") ||
+      searchData.items?.[0];
+
+    // Fallback search with original teamName if needed
+    if (!teamItem?.id && englishSearchName !== teamName) {
+      try {
+        const fallbackUrl = `https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(
+          teamName
+        )}&limit=5&type=team`;
+        const fbRes = await fetch(fallbackUrl, { headers: { "User-Agent": "MatchZone/1.0" } });
+        if (fbRes.ok) {
+          const fbData = (await fbRes.json()) as any;
+          teamItem =
+            fbData.items?.find((it: any) => it.type === "team" && it.sport === "soccer") ||
+            fbData.items?.[0];
+        }
+      } catch (_) {}
+    }
+
+    if (!teamItem || !teamItem.id) return null;
+
+    const teamId = String(teamItem.id);
+
+    // 2. Fetch team's schedule
+    const schedUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/${teamId}/schedule`;
+    const schedRes = await fetch(schedUrl, { headers: { "User-Agent": "MatchZone/1.0" } });
+    if (!schedRes.ok) return null;
+    const schedData = (await schedRes.json()) as any;
+
+    let completed = (schedData.events || []).filter(
+      (e: any) => e.competitions?.[0]?.status?.type?.completed === true
+    );
+
+    // If fewer than 5 completed, append previous season
+    if (completed.length < 5) {
+      try {
+        const prevRes = await fetch(`${schedUrl}?season=2025`, { headers: { "User-Agent": "MatchZone/1.0" } });
+        if (prevRes.ok) {
+          const prevData = (await prevRes.json()) as any;
+          const prevComp = (prevData.events || []).filter(
+            (e: any) => e.competitions?.[0]?.status?.type?.completed === true
+          );
+          completed = [...completed, ...prevComp];
+        }
+      } catch (_) {}
+    }
+
+    if (completed.length === 0) return null;
+
+    // Sort descending by date (most recent first)
+    completed.sort(
+      (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    const top5 = completed.slice(0, 5);
+
+    let wins = 0;
+    let draws = 0;
+    let losses = 0;
+    let goalsScored = 0;
+    let goalsConceded = 0;
+
+    const matches: RealFormMatchItem[] = top5.map((e: any) => {
+      const comp = e.competitions?.[0];
+      const me =
+        comp?.competitors?.find((c: any) => String(c.id) === teamId) ||
+        comp?.competitors?.[0];
+      const opp =
+        comp?.competitors?.find((c: any) => String(c.id) !== teamId) ||
+        comp?.competitors?.[1];
+
+      const myScore = parseInt(me?.score?.displayValue || "0", 10);
+      const oppScore = parseInt(opp?.score?.displayValue || "0", 10);
+      goalsScored += myScore;
+      goalsConceded += oppScore;
+
+      let result: "W" | "D" | "L" = "D";
+      if (myScore > oppScore) {
+        result = "W";
+        wins++;
+      } else if (myScore < oppScore) {
+        result = "L";
+        losses++;
+      } else {
+        draws++;
+      }
+
+      const isHome = me?.homeAway === "home";
+      const rawOppName = opp?.team?.displayName || "المنافس";
+      const oppKey = rawOppName.toLowerCase().trim();
+      const arabicOpp =
+        ARABIC_CLUB_NAMES[oppKey] ||
+        Object.entries(ARABIC_CLUB_NAMES).find(([k]) => oppKey.includes(k))?.[1] ||
+        rawOppName;
+
+      const oppLogo =
+        opp?.team?.logos?.[0]?.href ||
+        opp?.team?.logo ||
+        resolveTeamBadge(opp?.team, rawOppName) ||
+        "";
+
+      const compName =
+        e.league?.name ||
+        comp?.league?.name ||
+        "المسابقات الرسمية";
+
+      return {
+        date: formatArabicRelativeDate(e.date),
+        rawDate: e.date,
+        opponent: arabicOpp,
+        opponentLogo: oppLogo,
+        result,
+        score: isHome ? `${myScore} - ${oppScore}` : `${oppScore} - ${myScore}`,
+        competition: compName,
+        isHome,
+      };
+    });
+
+    const formResult: RealTeamFormResult = {
+      teamName,
+      matches,
+      formBadges: matches.map((m) => m.result),
+      stats: {
+        wins,
+        draws,
+        losses,
+        goalsScored,
+        goalsConceded,
+      },
+    };
+
+    teamFormCache.set(cleanKey, { data: formResult, timestamp: Date.now() });
+    return formResult;
+  } catch (err) {
+    logger.warn({ err, teamName }, "Error fetching real team form from ESPN");
+    return null;
+  }
+}
+
+export async function fetchRealMatchH2H(
+  homeName: string,
+  awayName: string,
+  competitionName = "المسابقات الرسمية"
+): Promise<RealH2HResult | null> {
+  const h2hKey = `${homeName.toLowerCase()}_vs_${awayName.toLowerCase()}`;
+  const cached = H2H_CACHE.get(h2hKey);
+  if (cached && Date.now() - cached.timestamp < TEAM_FORM_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  try {
+    const homeSearchName = resolveTeamEnglishSearchName(homeName);
+    const awaySearchName = resolveTeamEnglishSearchName(awayName);
+
+    // Search ESPN team search for home team to find schedule against away team
+    const searchUrl = `https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(
+      homeSearchName
+    )}&limit=5&type=team`;
+    const searchRes = await fetch(searchUrl, { headers: { "User-Agent": "MatchZone/1.0" } });
+    if (searchRes.ok) {
+      const sData = (await searchRes.json()) as any;
+      const teamItem =
+        sData.items?.find((it: any) => it.type === "team" && it.sport === "soccer") ||
+        sData.items?.[0];
+      if (teamItem && teamItem.id) {
+        // Query current schedule and previous season
+        const [schedResCurrent, schedResPrev] = await Promise.all([
+          fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/${teamItem.id}/schedule`, {
+            headers: { "User-Agent": "MatchZone/1.0" },
+          }).catch(() => null),
+          fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/${teamItem.id}/schedule?season=2025`, {
+            headers: { "User-Agent": "MatchZone/1.0" },
+          }).catch(() => null),
+        ]);
+
+        const eventsCurrent = schedResCurrent?.ok ? ((await schedResCurrent.json()) as any).events || [] : [];
+        const eventsPrev = schedResPrev?.ok ? ((await schedResPrev.json()) as any).events || [] : [];
+        const allEvents = [...eventsCurrent, ...eventsPrev];
+
+        const awayNorm = awayName.toLowerCase().trim();
+        const awaySearchNorm = awaySearchName.toLowerCase().trim();
+
+        const h2hEvents = allEvents.filter((e: any) => {
+          const isCompleted = e.competitions?.[0]?.status?.type?.completed === true;
+          if (!isCompleted) return false;
+          const opp = e.competitions?.[0]?.competitors?.find(
+            (c: any) => String(c.id) !== String(teamItem.id)
+          );
+          const oppName = (opp?.team?.displayName || "").toLowerCase();
+          return (
+            oppName.includes(awayNorm) ||
+            awayNorm.includes(oppName) ||
+            oppName.includes(awaySearchNorm) ||
+            awaySearchNorm.includes(oppName)
+          );
+        });
+
+        if (h2hEvents.length > 0) {
+          let homeWins = 0;
+          let draws = 0;
+          let awayWins = 0;
+          const matches: RealH2HMatchItem[] = [];
+
+          for (const ev of h2hEvents.slice(0, 5)) {
+            const comp = ev.competitions[0];
+            const homeC = comp.competitors.find((c: any) => c.homeAway === "home") || comp.competitors[0];
+            const awayC = comp.competitors.find((c: any) => c.homeAway === "away") || comp.competitors[1];
+
+            const hS = parseInt(homeC?.score?.displayValue || "0", 10);
+            const aS = parseInt(awayC?.score?.displayValue || "0", 10);
+            let winner: "home" | "away" | "draw" = "draw";
+            if (hS > aS) {
+              winner = "home";
+              homeWins++;
+            } else if (aS > hS) {
+              winner = "away";
+              awayWins++;
+            } else {
+              draws++;
+            }
+
+            const d = new Date(ev.date);
+            const dateStr = `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}/${d.getFullYear()}`;
+
+            matches.push({
+              date: dateStr,
+              competition: ev.league?.name || comp.league?.name || competitionName,
+              homeTeam: homeC?.team?.displayName || homeName,
+              awayTeam: awayC?.team?.displayName || awayName,
+              homeScore: hS,
+              awayScore: aS,
+              winner,
+            });
+          }
+
+          const total = matches.length;
+          const homeWinPct = Math.round((homeWins / total) * 100);
+          const drawPct = Math.round((draws / total) * 100);
+          const awayWinPct = 100 - homeWinPct - drawPct;
+
+          const res: RealH2HResult = {
+            summary: {
+              homeWins,
+              draws,
+              awayWins,
+              total,
+              homeWinPct,
+              drawPct,
+              awayWinPct,
+            },
+            matches,
+          };
+
+          H2H_CACHE.set(h2hKey, { data: res, timestamp: Date.now() });
+          return res;
+        }
+
+        // Clean empty result when no previous matches in recent seasons
+        const emptyResult: RealH2HResult = {
+          summary: {
+            homeWins: 0,
+            draws: 0,
+            awayWins: 0,
+            total: 0,
+            homeWinPct: 0,
+            drawPct: 0,
+            awayWinPct: 0,
+          },
+          matches: [],
+        };
+        H2H_CACHE.set(h2hKey, { data: emptyResult, timestamp: Date.now() });
+        return emptyResult;
+      }
+    }
+  } catch (err) {
+    logger.warn({ err, homeName, awayName }, "H2H fetch issue");
+  }
+
+  return {
+    summary: {
+      homeWins: 0,
+      draws: 0,
+      awayWins: 0,
+      total: 0,
+      homeWinPct: 0,
+      drawPct: 0,
+      awayWinPct: 0,
+    },
+    matches: [],
+  };
+}
+
+export async function getMatchRealFormAndH2H(
+  fixtureId: string | number,
+  homeName?: string,
+  awayName?: string,
+  competitionName = "الدوري"
+): Promise<{
+  homeForm: RealTeamFormResult | null;
+  awayForm: RealTeamFormResult | null;
+  h2h: RealH2HResult | null;
+}> {
+  let resolvedHome = homeName;
+  let resolvedAway = awayName;
+  let resolvedComp = competitionName;
+
+  // If names not provided, resolve fixture from matchora or espn
+  const numId = parseInt(String(fixtureId), 10);
+  if (!resolvedHome || !resolvedAway) {
+    try {
+      if (!isNaN(numId)) {
+        const fixture = (await getMatchoraFixtureById(numId)) || (await getEspnMatchById(numId));
+        if (fixture) {
+          resolvedHome = resolvedHome || fixture.teams?.home?.name;
+          resolvedAway = resolvedAway || fixture.teams?.away?.name;
+          resolvedComp = resolvedComp || fixture.league?.name;
+        }
+      }
+    } catch (_) {}
+  }
+
+  if (!resolvedHome || !resolvedAway) {
+    return { homeForm: null, awayForm: null, h2h: null };
+  }
+
+  // Fetch home and away form in parallel
+  const [homeForm, awayForm, h2h] = await Promise.all([
+    fetchRealTeamRecentForm(resolvedHome),
+    fetchRealTeamRecentForm(resolvedAway),
+    fetchRealMatchH2H(resolvedHome, resolvedAway, resolvedComp),
+  ]);
+
+  return { homeForm, awayForm, h2h };
 }
 

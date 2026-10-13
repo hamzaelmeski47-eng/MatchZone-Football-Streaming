@@ -66,6 +66,9 @@ import {
   parseMatchGoalScorers,
   getTeamRecentForm,
   getPreMatchH2H,
+  type TeamFormResult,
+  type H2HResult,
+  type FormMatchItem,
 } from '@/lib/match-details-helpers';
 import { AdminStreamsPage } from '@/pages/AdminStreamsPage';
 import { SplashScreen } from '@/components/SplashScreen';
@@ -75,6 +78,7 @@ import {
   loadRealMatchEvents,
   loadRealMatchLineups,
   loadRealMatchStatistics,
+  loadMatchFormAndH2H,
   loadAuthorizedStream,
   loadLiveSources,
   loadRealMatchDetails,
@@ -2508,6 +2512,7 @@ function formatCommentaryLanguage(lang?: string, channelName?: string): string {
 }
 
 interface PreMatchStatisticsProps {
+  matchId?: string | number;
   homeName: string;
   awayName: string;
   homeLogo?: string;
@@ -2516,24 +2521,60 @@ interface PreMatchStatisticsProps {
 }
 
 function PreMatchStatistics({
+  matchId,
   homeName,
   awayName,
   homeLogo,
   awayLogo,
   competitionName,
 }: PreMatchStatisticsProps) {
-  const homeForm = useMemo(
+  const [realStats, setRealStats] = useState<{
+    homeForm: TeamFormResult | null;
+    awayForm: TeamFormResult | null;
+    h2h: H2HResult | null;
+  } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    loadMatchFormAndH2H(matchId || '', homeName, awayName, competitionName)
+      .then((res) => {
+        if (active && res) {
+          setRealStats(res);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [matchId, homeName, awayName, competitionName]);
+
+  const fallbackHomeForm = useMemo(
     () => getTeamRecentForm(homeName, true, competitionName, homeLogo),
     [homeName, competitionName, homeLogo]
   );
-  const awayForm = useMemo(
+  const fallbackAwayForm = useMemo(
     () => getTeamRecentForm(awayName, false, competitionName, awayLogo),
     [awayName, competitionName, awayLogo]
   );
-  const h2h = useMemo(
+  const fallbackH2H = useMemo(
     () => getPreMatchH2H(homeName, awayName, competitionName),
     [homeName, awayName, competitionName]
   );
+
+  const homeForm: TeamFormResult =
+    realStats?.homeForm?.matches && realStats.homeForm.matches.length > 0
+      ? realStats.homeForm
+      : fallbackHomeForm;
+
+  const awayForm: TeamFormResult =
+    realStats?.awayForm?.matches && realStats.awayForm.matches.length > 0
+      ? realStats.awayForm
+      : fallbackAwayForm;
+
+  const h2h: H2HResult =
+    realStats?.h2h !== undefined && realStats?.h2h !== null
+      ? realStats.h2h
+      : fallbackH2H;
 
   return (
     <div className="pre-match-stats-root" dir="rtl" data-testid="pre-match-stats-widget">
@@ -2544,71 +2585,88 @@ function PreMatchStatistics({
             <Trophy size={18} className="text-amber-500" />
             <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>المواجهات المباشرة بين الفريقين (H2H)</h3>
           </div>
-          <span className="pre-stat-sub">آخر {h2h.summary.total} مواجهات مسجلة</span>
+          <span className="pre-stat-sub">
+            {h2h.summary?.total > 0
+              ? `آخر ${h2h.summary.total} مواجهات مسجلة`
+              : 'سجل المواجهات المباشرة'}
+          </span>
         </div>
 
-        {/* Win / Draw / Loss distribution overview */}
-        <div className="h2h-distribution-container">
-          <div className="h2h-summary-row">
-            <div className="h2h-team-col home">
-              <span className="h2h-team-name">{homeName}</span>
-              <span className="h2h-wins-count">{h2h.summary.homeWins} فوز</span>
-              <span className="h2h-win-pct">{h2h.summary.homeWinPct}%</span>
-            </div>
-            <div className="h2h-draw-col">
-              <span className="h2h-draw-label">التعادل</span>
-              <span className="h2h-draw-count">{h2h.summary.draws}</span>
-              <span className="h2h-draw-pct">{h2h.summary.drawPct}%</span>
-            </div>
-            <div className="h2h-team-col away">
-              <span className="h2h-team-name">{awayName}</span>
-              <span className="h2h-wins-count">{h2h.summary.awayWins} فوز</span>
-              <span className="h2h-win-pct">{h2h.summary.awayWinPct}%</span>
-            </div>
-          </div>
-
-          {/* Tri-color progress comparison bar */}
-          <div className="h2h-progress-bar">
-            <div
-              className="h2h-bar-segment home"
-              style={{ width: `${Math.max(h2h.summary.homeWinPct, 5)}%` }}
-              title={`فوز ${homeName}: ${h2h.summary.homeWinPct}%`}
-            />
-            <div
-              className="h2h-bar-segment draw"
-              style={{ width: `${Math.max(h2h.summary.drawPct, 5)}%` }}
-              title={`تعادل: ${h2h.summary.drawPct}%`}
-            />
-            <div
-              className="h2h-bar-segment away"
-              style={{ width: `${Math.max(h2h.summary.awayWinPct, 5)}%` }}
-              title={`فوز ${awayName}: ${h2h.summary.awayWinPct}%`}
-            />
-          </div>
-        </div>
-
-        {/* List of past encounters */}
-        <div className="h2h-matches-list">
-          {h2h.matches.map((m, idx) => (
-            <div key={idx} className="h2h-match-item">
-              <div className="h2h-match-meta">
-                <span className="h2h-match-date">{m.date}</span>
-                <span className="h2h-match-comp">{m.competition}</span>
+        {h2h.matches && h2h.matches.length > 0 ? (
+          <>
+            {/* Win / Draw / Loss distribution overview */}
+            <div className="h2h-distribution-container">
+              <div className="h2h-summary-row">
+                <div className="h2h-team-col home">
+                  <span className="h2h-team-name">{homeName}</span>
+                  <span className="h2h-wins-count">{h2h.summary.homeWins} فوز</span>
+                  <span className="h2h-win-pct">{h2h.summary.homeWinPct}%</span>
+                </div>
+                <div className="h2h-draw-col">
+                  <span className="h2h-draw-label">التعادل</span>
+                  <span className="h2h-draw-count">{h2h.summary.draws}</span>
+                  <span className="h2h-draw-pct">{h2h.summary.drawPct}%</span>
+                </div>
+                <div className="h2h-team-col away">
+                  <span className="h2h-team-name">{awayName}</span>
+                  <span className="h2h-wins-count">{h2h.summary.awayWins} فوز</span>
+                  <span className="h2h-win-pct">{h2h.summary.awayWinPct}%</span>
+                </div>
               </div>
-              <div className="h2h-match-scoreline">
-                <span className={`h2h-score-team ${m.winner === 'home' ? 'winner' : ''}`}>
-                  {m.homeTeam}
-                </span>
-                <span className="h2h-score-badge" dir="ltr">
-                  {m.homeScore} - {m.awayScore}
-                </span>
-                <span className={`h2h-score-team ${m.winner === 'away' ? 'winner' : ''}`}>
-                  {m.awayTeam}
-                </span>
+
+              {/* Tri-color progress comparison bar */}
+              <div className="h2h-progress-bar">
+                <div
+                  className="h2h-bar-segment home"
+                  style={{ width: `${Math.max(h2h.summary.homeWinPct, 5)}%` }}
+                  title={`فوز ${homeName}: ${h2h.summary.homeWinPct}%`}
+                />
+                <div
+                  className="h2h-bar-segment draw"
+                  style={{ width: `${Math.max(h2h.summary.drawPct, 5)}%` }}
+                  title={`تعادل: ${h2h.summary.drawPct}%`}
+                />
+                <div
+                  className="h2h-bar-segment away"
+                  style={{ width: `${Math.max(h2h.summary.awayWinPct, 5)}%` }}
+                  title={`فوز ${awayName}: ${h2h.summary.awayWinPct}%`}
+                />
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* List of past encounters */}
+            <div className="h2h-matches-list">
+              {h2h.matches.map((m: any, idx: number) => (
+                <div key={idx} className="h2h-match-item">
+                  <div className="h2h-match-meta">
+                    <span className="h2h-match-date">{m.date}</span>
+                    <span className="h2h-match-comp">{m.competition}</span>
+                  </div>
+                  <div className="h2h-match-scoreline">
+                    <span className={`h2h-score-team ${m.winner === 'home' ? 'winner' : ''}`}>
+                      {m.homeTeam}
+                    </span>
+                    <span className="h2h-score-badge" dir="ltr">
+                      {m.homeScore} - {m.awayScore}
+                    </span>
+                    <span className={`h2h-score-team ${m.winner === 'away' ? 'winner' : ''}`}>
+                      {m.awayTeam}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ padding: '24px 16px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 12, marginTop: 12, border: '1px dashed hsl(var(--border))' }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14.5, color: 'hsl(var(--foreground))' }}>
+              لا توجد مواجهات مباشرة مسجلة مؤخراً بين {homeName} و {awayName}
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 13, color: 'hsl(var(--muted-foreground))' }}>
+              سجل المواجهات المباشرة خالٍ من أي مباريات رسمية بين الفريقين في المواسم الأخيرة.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* 2. Recent Form: Last 5 matches for each team (سجل آخر 5 مباريات) */}
@@ -2958,7 +3016,6 @@ function MatchDetailsPage() {
               <div className="team-goalscorers-list" data-testid="home-goalscorers">
                 {homeGoals.map((g, idx) => (
                   <div key={idx} className="goalscorer-item">
-                    <span className="goal-icon">⚽</span>
                     <span className="goalscorer-name">{g.playerName}</span>
                     <span className="goal-minute" dir="ltr">{g.minute}</span>
                     {g.isPenalty && <span className="goal-tag-badge">ر.ج</span>}
@@ -3047,7 +3104,6 @@ function MatchDetailsPage() {
               <div className="team-goalscorers-list" data-testid="away-goalscorers">
                 {awayGoals.map((g, idx) => (
                   <div key={idx} className="goalscorer-item">
-                    <span className="goal-icon">⚽</span>
                     <span className="goalscorer-name">{g.playerName}</span>
                     <span className="goal-minute" dir="ltr">{g.minute}</span>
                     {g.isPenalty && <span className="goal-tag-badge">ر.ج</span>}
@@ -3221,6 +3277,7 @@ function MatchDetailsPage() {
             {isUpcoming && (
               <div style={{ gridColumn: '1 / -1', marginTop: 14 }}>
                 <PreMatchStatistics
+                  matchId={match.id}
                   homeName={homeName}
                   awayName={awayName}
                   homeLogo={homeLogo}
@@ -3256,6 +3313,7 @@ function MatchDetailsPage() {
             </h3>
             {isUpcoming ? (
               <PreMatchStatistics
+                matchId={match.id}
                 homeName={homeName}
                 awayName={awayName}
                 homeLogo={homeLogo}
