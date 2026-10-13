@@ -166,7 +166,15 @@ export function isMajorCompetition(f: ApiFootballFixture): boolean {
   // Copa America
   if (leagueId === 9 || name.includes("copa america") || name.includes("copa américa")) return true;
   // Asian Cup
-  if ([15, 16, 17].includes(leagueId) || name.includes("asian cup")) return true;
+  if ([15, 16].includes(leagueId) || name.includes("asian cup")) return true;
+  // Continental Club Tournaments (AFC, CAF, CONCACAF)
+  if ([17, 18].includes(leagueId) || name.includes("afc champions") || name.includes("afc elite")) return true;
+  if ([12, 20].includes(leagueId) || name.includes("caf champions") || name.includes("caf confederation")) return true;
+  // Arab Major Leagues
+  if ([307, 308].includes(leagueId) || name.includes("saudi") || name.includes("roshn")) return true;
+  if ([200, 201].includes(leagueId) || name.includes("botola")) return true;
+  if ([233, 234].includes(leagueId) || name.includes("egypt")) return true;
+  if ([305, 301].includes(leagueId) || name.includes("qatar") || name.includes("adnoc")) return true;
   // Senior International Friendlies
   if ((leagueId === 10 || leagueId === 667 || name.includes("friend")) && (country === "world" || country === "international")) {
     return true;
@@ -728,8 +736,133 @@ export function normalizeFixtureLeague(fixture: ApiFootballFixture): void {
     return;
   }
 
-  // UEFA Champions League
-  if (rawName.includes("champions league") || rawName.includes("أبطال أوروبا") || fixture.league.id === 2) {
+  // AFC Champions League Elite (دوري أبطال آسيا للنخبة)
+  if (
+    rawName.includes("afc champions league elite") ||
+    rawName.includes("afc elite") ||
+    rawName.includes("أبطال آسيا للنخبة") ||
+    rawName.includes("آسيا للنخبة") ||
+    rawName.includes("afc.champions") ||
+    fixture.league.id === 17
+  ) {
+    fixture.league.name = "دوري أبطال آسيا للنخبة";
+    fixture.league.country = "Asia";
+    fixture.league.id = 17;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/17.png";
+    return;
+  }
+
+  // AFC Champions League Two (دوري أبطال آسيا 2)
+  if (
+    rawName.includes("afc champions league two") ||
+    rawName.includes("afc champions league 2") ||
+    rawName.includes("afc cup") ||
+    rawName.includes("كأس الاتحاد الآسيوي") ||
+    rawName.includes("أبطال آسيا 2") ||
+    rawName.includes("أبطال آسيا الثاني") ||
+    fixture.league.id === 18
+  ) {
+    fixture.league.name = "دوري أبطال آسيا 2";
+    fixture.league.country = "Asia";
+    fixture.league.id = 18;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/18.png";
+    return;
+  }
+
+  // Generic AFC Champions League
+  if (
+    rawName.includes("afc champions league") ||
+    rawName.includes("afc champion") ||
+    rawName.includes("أبطال آسيا")
+  ) {
+    fixture.league.name = "دوري أبطال آسيا للنخبة";
+    fixture.league.country = "Asia";
+    fixture.league.id = 17;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/17.png";
+    return;
+  }
+
+  // CAF Champions League (دوري أبطال إفريقيا)
+  if (
+    rawName.includes("caf champions league") ||
+    rawName.includes("caf champion") ||
+    rawName.includes("أبطال أفريقيا") ||
+    rawName.includes("أبطال إفريقيا") ||
+    rawName.includes("caf.champions") ||
+    fixture.league.id === 12
+  ) {
+    fixture.league.name = "دوري أبطال إفريقيا";
+    fixture.league.country = "Africa";
+    fixture.league.id = 12;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/12.png";
+    return;
+  }
+
+  // CAF Confederation Cup (كأس الكونفيدرالية الإفريقية)
+  if (
+    rawName.includes("caf confederation") ||
+    rawName.includes("الكونفيدرالية الإفريقية") ||
+    rawName.includes("الكونفدرالية") ||
+    fixture.league.id === 20
+  ) {
+    fixture.league.name = "كأس الكونفيدرالية الإفريقية";
+    fixture.league.country = "Africa";
+    fixture.league.id = 20;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/20.png";
+    return;
+  }
+
+  // CONCACAF Champions Cup (كأس أبطال الكونكاكاف)
+  if (
+    rawName.includes("concacaf champions") ||
+    rawName.includes("concacaf champion") ||
+    rawName.includes("أبطال الكونكاكاف") ||
+    fixture.league.id === 16
+  ) {
+    fixture.league.name = "كأس أبطال الكونكاكاف";
+    fixture.league.country = "North America";
+    fixture.league.id = 16;
+    fixture.league.logo = "https://media.api-sports.io/football/leagues/16.png";
+    return;
+  }
+
+  // UEFA Champions League (دوري أبطال أوروبا) - Strictly separated from Asian and African Champions Leagues!
+  if (
+    ((rawName.includes("champions league") || rawName.includes("أبطال أوروبا")) &&
+      !rawName.includes("afc") &&
+      !rawName.includes("caf") &&
+      !rawName.includes("concacaf") &&
+      !rawName.includes("آسيا") &&
+      !rawName.includes("أفريقيا") &&
+      !rawName.includes("إفريقيا")) ||
+    (fixture.league.id === 2 && !rawName.includes("afc") && !rawName.includes("caf") && !rawName.includes("concacaf"))
+  ) {
+    // Safety check: verify teams are not Asian or African clubs mistakenly labeled as UCL
+    const home = (fixture.teams?.home?.name || "").toLowerCase();
+    const away = (fixture.teams?.away?.name || "").toLowerCase();
+    const isAsianTeam =
+      home.includes("al-hilal") || away.includes("al-hilal") || home.includes("الهلال") || away.includes("الهلال") ||
+      home.includes("al-sadd") || away.includes("al-sadd") || home.includes("السد") || away.includes("السد") ||
+      home.includes("al-nassr") || away.includes("al-nassr") || home.includes("النصر") || away.includes("النصر") ||
+      home.includes("gamba osaka") || away.includes("gamba osaka") ||
+      home.includes("kashima") || away.includes("kashima") ||
+      home.includes("buriram") || away.includes("buriram") ||
+      home.includes("shanghai") || away.includes("shanghai") ||
+      home.includes("al-shorta") || away.includes("al-shorta") ||
+      home.includes("east bengal") || away.includes("east bengal") ||
+      home.includes("al-seeb") || away.includes("al-seeb") ||
+      home.includes("al-hussein") || away.includes("al-hussein") ||
+      home.includes("shabab al-ahli") || away.includes("shabab al-ahli");
+
+    if (isAsianTeam) {
+      const isTwo = home.includes("al-shorta") || away.includes("al-shorta") || home.includes("east bengal") || away.includes("east bengal") || home.includes("al-seeb") || away.includes("al-seeb") || home.includes("al-hussein") || away.includes("al-hussein");
+      fixture.league.name = isTwo ? "دوري أبطال آسيا 2" : "دوري أبطال آسيا للنخبة";
+      fixture.league.country = "Asia";
+      fixture.league.id = isTwo ? 18 : 17;
+      fixture.league.logo = `https://media.api-sports.io/football/leagues/${isTwo ? 18 : 17}.png`;
+      return;
+    }
+
     fixture.league.name = "دوري أبطال أوروبا";
     fixture.league.country = "Europe";
     fixture.league.id = 2;

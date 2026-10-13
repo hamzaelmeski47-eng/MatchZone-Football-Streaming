@@ -205,10 +205,16 @@ export const VERIFIED_COMPETITION_LOGOS: Record<string, string> = {
   '20': 'https://media.api-sports.io/football/leagues/20.png',
 
   'afc champions league elite': 'https://media.api-sports.io/football/leagues/17.png',
+  'afc champions league two': 'https://media.api-sports.io/football/leagues/18.png',
+  'afc champions league 2': 'https://media.api-sports.io/football/leagues/18.png',
   'afc champions league': 'https://media.api-sports.io/football/leagues/17.png',
   'دوري أبطال آسيا للنخبة': 'https://media.api-sports.io/football/leagues/17.png',
+  'دوري أبطال آسيا 2': 'https://media.api-sports.io/football/leagues/18.png',
   'دوري أبطال آسيا': 'https://media.api-sports.io/football/leagues/17.png',
   '17': 'https://media.api-sports.io/football/leagues/17.png',
+  '18': 'https://media.api-sports.io/football/leagues/18.png',
+  'concacaf champions cup': 'https://media.api-sports.io/football/leagues/16.png',
+  '16': 'https://media.api-sports.io/football/leagues/16.png',
 };
 
 // Verified Arabic mappings for major international and club competitions
@@ -293,8 +299,13 @@ const VERIFIED_ARABIC_COMPETITIONS: Record<string, { arabicName: string; default
   'asian cup': { arabicName: 'كأس آسيا', defaultCountry: 'آسيا' },
   'caf champions league': { arabicName: 'دوري أبطال إفريقيا', defaultCountry: 'إفريقيا' },
   'caf confederation cup': { arabicName: 'كأس الكونفيدرالية الإفريقية', defaultCountry: 'إفريقيا' },
-  'afc champions league': { arabicName: 'دوري أبطال آسيا', defaultCountry: 'آسيا' },
   'afc champions league elite': { arabicName: 'دوري أبطال آسيا للنخبة', defaultCountry: 'آسيا' },
+  'afc champions league two': { arabicName: 'دوري أبطال آسيا 2', defaultCountry: 'آسيا' },
+  'afc champions league 2': { arabicName: 'دوري أبطال آسيا 2', defaultCountry: 'آسيا' },
+  'afc champions league': { arabicName: 'دوري أبطال آسيا للنخبة', defaultCountry: 'آسيا' },
+  'afc cup': { arabicName: 'كأس الاتحاد الآسيوي', defaultCountry: 'آسيا' },
+  'concacaf champions cup': { arabicName: 'كأس أبطال الكونكاكاف', defaultCountry: 'أمريكا الشمالية' },
+  'concacaf champions league': { arabicName: 'كأس أبطال الكونكاكاف', defaultCountry: 'أمريكا الشمالية' },
   'fifa club world cup': { arabicName: 'كأس العالم للأندية', defaultCountry: 'دولي' },
   'club world cup': { arabicName: 'كأس العالم للأندية', defaultCountry: 'دولي' },
   'friendlies': { arabicName: 'مباريات ودية دولية', defaultCountry: 'دولي' },
@@ -588,6 +599,22 @@ export function formatCompetitionInfo(options: {
     if (isMatch) {
       // Disambiguate Serie A: If Italy, make sure country is not Brazil
       if (key === 'serie a' && (cleanCountry.includes('brazil') || cleanCountry.includes('البرازيل'))) {
+        continue;
+      }
+      // Disambiguate Champions League: Never allow UEFA Champions League to match AFC, CAF, or CONCACAF!
+      if (
+        (key === 'champions league' || key === 'uefa champions league') &&
+        (cleanLower.includes('afc') ||
+          cleanLower.includes('caf') ||
+          cleanLower.includes('concacaf') ||
+          cleanLower.includes('آسيا') ||
+          cleanLower.includes('إفريقيا') ||
+          cleanLower.includes('أفريقيا') ||
+          cleanCountry.includes('asia') ||
+          cleanCountry.includes('africa') ||
+          cleanCountry.includes('آسيا') ||
+          cleanCountry.includes('إفريقيا'))
+      ) {
         continue;
       }
       const entry = VERIFIED_ARABIC_COMPETITIONS[key];

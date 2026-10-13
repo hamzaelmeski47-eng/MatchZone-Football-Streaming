@@ -886,10 +886,18 @@ function MatchesPage() {
     >();
 
     for (const match of filtered) {
+      // 1. Resolve and format verified competition info
+      const compInfo = formatCompetitionInfo({
+        id: match.competitionId,
+        name: match.competitionName,
+        country: match.competitionCountry,
+        logo: match.competitionLogo,
+      });
+
       let compId = match.competitionId || 'other';
-      let compName = match.competitionName || 'المباريات الودية';
-      let compLogo = match.competitionLogo;
-      let compCountry = match.competitionCountry;
+      let compName = compInfo.competitionName;
+      let compLogo = compInfo.competitionLogo || match.competitionLogo;
+      let compCountry = compInfo.competitionCountry || match.competitionCountry;
 
       // Disambiguate if Brazilian teams were placed under Italian Serie A
       const isBr = isBrazilianMatch(match.homeName, match.awayName);
@@ -907,7 +915,38 @@ function MatchesPage() {
         compLogo = 'https://media.api-sports.io/football/leagues/71.png';
       }
 
-      const key = compId || compName || 'other';
+      // Safety check: ensure Asian teams are never bundled under UEFA Champions League
+      const homeL = (match.homeName || '').toLowerCase();
+      const awayL = (match.awayName || '').toLowerCase();
+      const isAsianClubs =
+        homeL.includes('hilal') || awayL.includes('hilal') || homeL.includes('الهلال') || awayL.includes('الهلال') ||
+        homeL.includes('sadd') || awayL.includes('sadd') || homeL.includes('السد') || awayL.includes('السد') ||
+        homeL.includes('ittihad') || awayL.includes('ittihad') || homeL.includes('الاتحاد') || awayL.includes('الاتحاد') ||
+        homeL.includes('nassr') || awayL.includes('nassr') || homeL.includes('النصر') || awayL.includes('النصر') ||
+        homeL.includes('gamba') || awayL.includes('gamba') ||
+        homeL.includes('shanghai') || awayL.includes('shanghai') ||
+        homeL.includes('buriram') || awayL.includes('buriram') ||
+        homeL.includes('kashima') || awayL.includes('kashima') ||
+        homeL.includes('ratchaburi') || awayL.includes('ratchaburi') ||
+        homeL.includes('kyoto') || awayL.includes('kyoto') ||
+        homeL.includes('daejeon') || awayL.includes('daejeon') ||
+        homeL.includes('beijing') || awayL.includes('beijing') ||
+        homeL.includes('shorta') || awayL.includes('shorta') ||
+        homeL.includes('bengal') || awayL.includes('bengal') ||
+        homeL.includes('seeb') || awayL.includes('seeb') ||
+        homeL.includes('hussein') || awayL.includes('hussein') ||
+        homeL.includes('shabab al-ahli') || awayL.includes('shabab al-ahli');
+
+      if (isAsianClubs && (compName.includes('أوروبا') || compId === '2')) {
+        const isTwo = homeL.includes('shorta') || awayL.includes('shorta') || homeL.includes('bengal') || awayL.includes('bengal') || homeL.includes('seeb') || awayL.includes('seeb') || homeL.includes('hussein') || awayL.includes('hussein');
+        compId = isTwo ? '18' : '17';
+        compName = isTwo ? 'دوري أبطال آسيا 2' : 'دوري أبطال آسيا للنخبة';
+        compCountry = 'آسيا';
+        compLogo = `https://media.api-sports.io/football/leagues/${isTwo ? '18' : '17'}.png`;
+      }
+
+      // Group key based on normalized Arabic name so each tournament is strictly isolated
+      const key = normalizeCompetitionName(compName) || compId || 'other';
       if (!map.has(key)) {
         map.set(key, {
           competitionId: compId,
@@ -971,9 +1010,9 @@ function MatchesPage() {
 
             return (
               <div
-                key={group.competitionId}
+                key={`${group.competitionId}-${group.competitionName}`}
                 className="dimalive-comp-card"
-                data-testid={`comp-card-${group.competitionId}`}
+                data-testid={`comp-card-${normalizeCompetitionName(group.competitionName)}`}
               >
                 {/* Competition Header */}
                 <div className="dimalive-comp-header">

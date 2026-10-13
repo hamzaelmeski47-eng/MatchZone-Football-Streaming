@@ -785,7 +785,14 @@ function resolveLeagueId(name?: string): number {
   if (lower.includes("serie a") && !lower.includes("brazil")) return 135;
   if (lower.includes("bundesliga")) return 78;
   if (lower.includes("ligue 1")) return 61;
-  if (lower.includes("champions league")) return 2;
+  // Specific Continental Champions Leagues (AFC, CAF, CONCACAF before UEFA)
+  if (lower.includes("afc champions league elite") || lower.includes("afc elite")) return 17;
+  if (lower.includes("afc champions league two") || lower.includes("afc champions league 2") || lower.includes("afc cup")) return 18;
+  if (lower.includes("afc champions league") || lower.includes("afc champion")) return 17;
+  if (lower.includes("caf champions league") || lower.includes("caf champion")) return 12;
+  if (lower.includes("caf confederation")) return 20;
+  if (lower.includes("concacaf champions")) return 16;
+  if (lower.includes("uefa champions league") || (lower.includes("champions league") && !lower.includes("afc") && !lower.includes("caf"))) return 2;
   if (lower.includes("europa league")) return 3;
   if (lower.includes("conference league")) return 848;
   if (lower.includes("concacaf nations league") || lower.includes("concacaf nation")) return 400;
@@ -795,6 +802,9 @@ function resolveLeagueId(name?: string): number {
   if (lower.includes("euro") && !lower.includes("america")) return 4;
   if (lower.includes("africa") || lower.includes("afcon")) return 6;
   if (lower.includes("copa america")) return 9;
+  if (lower.includes("saudi") || lower.includes("roshn")) return 307;
+  if (lower.includes("botola")) return 200;
+  if (lower.includes("egypt")) return 233;
   if (lower.includes("friend")) return 10;
   return Math.abs(hashString(name || "Soccer"));
 }
@@ -806,6 +816,12 @@ function resolveLeagueCountry(name?: string): string {
   if (lower.includes("serie a") || lower.includes("italian")) return "Italy";
   if (lower.includes("bundesliga") || lower.includes("german")) return "Germany";
   if (lower.includes("ligue 1") || lower.includes("french")) return "France";
+  if (lower.includes("afc") || lower.includes("asia")) return "Asia";
+  if (lower.includes("caf") || lower.includes("africa")) return "Africa";
+  if (lower.includes("uefa") || lower.includes("champions league") || lower.includes("europa") || lower.includes("conference")) return "Europe";
+  if (lower.includes("saudi") || lower.includes("roshn")) return "Saudi Arabia";
+  if (lower.includes("morocco") || lower.includes("botola")) return "Morocco";
+  if (lower.includes("egypt")) return "Egypt";
   if (lower.includes("concacaf")) return "CONCACAF";
   if (lower.includes("brazil")) return "Brazil";
   if (lower.includes("argentin")) return "Argentina";

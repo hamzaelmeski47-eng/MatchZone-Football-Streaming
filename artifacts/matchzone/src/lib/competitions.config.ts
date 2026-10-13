@@ -216,6 +216,16 @@ export const SUPPORTED_COMPETITIONS: SupportedCompetition[] = [
     active: true,
   },
   {
+    id: 18,
+    name: 'AFC Champions League Two',
+    arabicName: 'دوري أبطال آسيا 2',
+    slug: 'afc-champions-league-two',
+    country: 'Asia',
+    type: 'cup',
+    category: 'continental',
+    active: true,
+  },
+  {
     id: 7,
     name: 'UEFA Nations League',
     arabicName: 'دوري الأمم الأوروبية',

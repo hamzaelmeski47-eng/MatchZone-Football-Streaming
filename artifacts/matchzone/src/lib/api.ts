@@ -350,6 +350,36 @@ export function normalizeApiFootballFixture(f: ApiFootballFixtureRaw): Match {
     compLogo = 'https://media.api-sports.io/football/leagues/71.png';
   }
 
+  // Safety check: ensure Asian clubs are never assigned to UEFA Champions League
+  const homeL = (f.teams.home.name || '').toLowerCase();
+  const awayL = (f.teams.away.name || '').toLowerCase();
+  const isAsianClubs =
+    homeL.includes('hilal') || awayL.includes('hilal') || homeL.includes('الهلال') || awayL.includes('الهلال') ||
+    homeL.includes('sadd') || awayL.includes('sadd') || homeL.includes('السد') || awayL.includes('السد') ||
+    homeL.includes('ittihad') || awayL.includes('ittihad') || homeL.includes('الاتحاد') || awayL.includes('الاتحاد') ||
+    homeL.includes('nassr') || awayL.includes('nassr') || homeL.includes('النصر') || awayL.includes('النصر') ||
+    homeL.includes('gamba') || awayL.includes('gamba') ||
+    homeL.includes('shanghai') || awayL.includes('shanghai') ||
+    homeL.includes('buriram') || awayL.includes('buriram') ||
+    homeL.includes('kashima') || awayL.includes('kashima') ||
+    homeL.includes('ratchaburi') || awayL.includes('ratchaburi') ||
+    homeL.includes('kyoto') || awayL.includes('kyoto') ||
+    homeL.includes('daejeon') || awayL.includes('daejeon') ||
+    homeL.includes('beijing') || awayL.includes('beijing') ||
+    homeL.includes('shorta') || awayL.includes('shorta') ||
+    homeL.includes('bengal') || awayL.includes('bengal') ||
+    homeL.includes('seeb') || awayL.includes('seeb') ||
+    homeL.includes('hussein') || awayL.includes('hussein') ||
+    homeL.includes('shabab al-ahli') || awayL.includes('shabab al-ahli');
+
+  if (isAsianClubs && (compName.includes('أوروبا') || compId === '2')) {
+    const isTwo = homeL.includes('shorta') || awayL.includes('shorta') || homeL.includes('bengal') || awayL.includes('bengal') || homeL.includes('seeb') || awayL.includes('seeb') || homeL.includes('hussein') || awayL.includes('hussein');
+    compId = isTwo ? '18' : '17';
+    compName = isTwo ? 'دوري أبطال آسيا 2' : 'دوري أبطال آسيا للنخبة';
+    compCountry = 'Asia';
+    compLogo = `https://media.api-sports.io/football/leagues/${isTwo ? '18' : '17'}.png`;
+  }
+
   const resolvedVenue = resolveMatchStadium({
     venue: f.fixture.venue?.name,
     homeName: f.teams.home.name,

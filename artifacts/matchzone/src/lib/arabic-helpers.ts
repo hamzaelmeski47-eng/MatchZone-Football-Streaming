@@ -314,7 +314,14 @@ export function getArabicCompetitionName(name?: string): string {
   if (lower.includes('serie a')) return 'الدوري الإيطالي';
   if (lower.includes('bundesliga')) return 'الدوري الألماني';
   if (lower.includes('ligue 1')) return 'الدوري الفرنسي';
-  if (lower.includes('champions league')) return 'دوري أبطال أوروبا';
+  // Specific Continental Champions Leagues
+  if (lower.includes('afc champions league elite') || lower.includes('afc elite') || lower.includes('أبطال آسيا للنخبة')) return 'دوري أبطال آسيا للنخبة';
+  if (lower.includes('afc champions league two') || lower.includes('afc champions league 2') || lower.includes('أبطال آسيا 2')) return 'دوري أبطال آسيا 2';
+  if (lower.includes('afc champions league') || lower.includes('أبطال آسيا')) return 'دوري أبطال آسيا للنخبة';
+  if (lower.includes('caf champions league') || lower.includes('أبطال إفريقيا') || lower.includes('أبطال أفريقيا')) return 'دوري أبطال إفريقيا';
+  if (lower.includes('caf confederation') || lower.includes('الكونفيدرالية الإفريقية')) return 'كأس الكونفيدرالية الإفريقية';
+  if (lower.includes('concacaf champions') || lower.includes('أبطال الكونكاكاف')) return 'كأس أبطال الكونكاكاف';
+  if (lower.includes('uefa champions league') || (lower.includes('champions league') && !lower.includes('afc') && !lower.includes('caf'))) return 'دوري أبطال أوروبا';
   if (lower.includes('europa league')) return 'الدوري الأوروبي';
   if (lower.includes('conference league')) return 'دوري المؤتمر الأوروبي';
   if (lower.includes('super cup')) return 'كأس السوبر الأوروبي';
