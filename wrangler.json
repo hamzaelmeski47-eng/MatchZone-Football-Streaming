@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "matchzone",
+  "compatibility_date": "2024-09-23",
+  "pages_build_output_dir": "artifacts/matchzone/dist/public",
+  "assets": {
+    "directory": "artifacts/matchzone/dist/public"
+  }
+}
