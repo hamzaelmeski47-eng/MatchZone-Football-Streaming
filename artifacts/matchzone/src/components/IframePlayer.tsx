@@ -219,7 +219,6 @@ export function IframePlayer({ src, title, onError,
 
       {/* Responsive Video Player Iframe */}
       {(() => {
-        // Ensure Matchora embed URLs always use valid /embed/match/{eventId}?ch={channelId} format.
         let cleanSrc = src;
         const chDirectMatch = cleanSrc.match(/matchora\.to\/embed\/channel\/([0-9a-zA-Z_-]+)/i);
         if (chDirectMatch && chDirectMatch[1]) {
@@ -229,7 +228,6 @@ export function IframePlayer({ src, title, onError,
           }
         }
 
-        // Route Matchora embeds through clean-embed endpoint to strip all popup ads, trackers and auto-play blockers
         const finalPlayerSrc = cleanSrc.includes('matchora.to')
           ? `/api/streams/clean-embed?url=${encodeURIComponent(cleanSrc)}`
           : cleanSrc;
@@ -246,7 +244,6 @@ export function IframePlayer({ src, title, onError,
               frameBorder="0"
               scrolling="no"
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
               allowFullScreen
               onLoad={() => setLoading(false)}
               onError={() => {

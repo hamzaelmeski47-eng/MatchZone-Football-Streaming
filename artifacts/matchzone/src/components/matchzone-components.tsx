@@ -815,13 +815,32 @@ export function MatchCard({
               {match.date}
               {match.kickoffTime ? ` • ${match.kickoffTime}` : ''}
             </span>
+            {(() => {
+              const channelName = match.channel || resolveMatchBroadcaster({
+                homeName: home.name,
+                awayName: away.name,
+                competitionName: compInfo.competitionName,
+                competitionId: match.competitionId,
+                knownChannel: match.channel,
+              });
+              return (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#C084FC', background: 'rgba(168, 85, 247, 0.1)', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>
+                  <Tv size={11} style={{ color: '#A855F7' }} />
+                  {channelName}
+                </span>
+              );
+            })()}
           </div>
           <span className="section-link" data-testid={`link-details-${match.id}`}>
             تفاصيل المباراة <ChevronRight size={13} style={{ verticalAlign: 'middle' }} />
           </span>
         </div>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '4px 10px 6px', fontSize: 11, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 10px 6px', fontSize: 11, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#C084FC', fontWeight: 600 }}>
+            <Tv size={10} style={{ color: '#A855F7' }} />
+            {match.channel || resolveMatchBroadcaster({ homeName: home.name, awayName: away.name, competitionName: compInfo.competitionName, competitionId: match.competitionId })}
+          </span>
           <span style={{ color: '#94A3B8', fontSize: 10.5 }}>{match.kickoffTime || match.time}</span>
         </div>
       )}

@@ -269,6 +269,84 @@ const TEAM_STADIUMS: Record<string, string> = {
   'الزمالك': 'ستاد القاهرة الدولي',
   'pyramids': 'ستاد الدفاع الجوي (30 يونيو)',
   'بيراميدز': 'ستاد الدفاع الجوي (30 يونيو)',
+
+  // Turkish Super Lig & European Giants
+  'galatasaray': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'غلطة سراي': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'غلطةسراي': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'fenerbahce': 'ملعب شكري سراج أوغلو (Şükrü Saracoğlu - إسطنبول)',
+  'fenerbahçe': 'ملعب شكري سراج أوغلو (Şükrü Saracoğlu - إسطنبول)',
+  'فنربخشة': 'ملعب شكري سراج أوغلو (Şükrü Saracoğlu - إسطنبول)',
+  'besiktas': 'ملعب توبراش (Tüpraş Stadyumu - إسطنبول)',
+  'beşiktaş': 'ملعب توبراش (Tüpraş Stadyumu - إسطنبول)',
+  'بشكتاش': 'ملعب توبراش (Tüpraş Stadyumu - إسطنبول)',
+  'trabzonspor': 'ملعب بابارا بارك (Papara Park - طرابزون)',
+  'طرابزون سبور': 'ملعب بابارا بارك (Papara Park - طرابزون)',
+
+  // Portuguese Primeira Liga
+  'porto': 'ملعب الدراجاو (Estádio do Dragão - بورتو)',
+  'بورتو': 'ملعب الدراجاو (Estádio do Dragão - بورتو)',
+  'benfica': 'ملعب النور (Estádio da Luz - لشبونة)',
+  'بنفيكا': 'ملعب النور (Estádio da Luz - لشبونة)',
+  'sporting': 'ملعب خوسيه ألفالادي (José Alvalade - لشبونة)',
+  'سبورتينغ': 'ملعب خوسيه ألفالادي (José Alvalade - لشبونة)',
+  'سبورتنج': 'ملعب خوسيه ألفالادي (José Alvalade - لشبونة)',
+  'braga': 'الملعب البلدي ببراغا (Braga)',
+  'براغا': 'الملعب البلدي ببراغا (Braga)',
+
+  // Dutch Eredivisie
+  'ajax': 'يوهان كرويف أرينا (Johan Cruyff Arena - أمستردام)',
+  'أياكس': 'يوهان كرويف أرينا (Johan Cruyff Arena - أمستردام)',
+  'psv': 'ملعب فيليبس (Philips Stadion - آيندهوفن)',
+  'آيندهوفن': 'ملعب فيليبس (Philips Stadion - آيندهوفن)',
+  'feyenoord': 'ملعب دي كويب (De Kuip - روتردام)',
+  'فاينورد': 'ملعب دي كويب (De Kuip - روتردام)',
+
+  // Scottish & Other European
+  'celtic': 'سلتيك بارك (Celtic Park - غلاسكو)',
+  'سلتيك': 'سلتيك بارك (Celtic Park - غلاسكو)',
+  'rangers': 'ملعب إيبروكس (Ibrox Stadium - غلاسكو)',
+  'رينجرز': 'ملعب إيبروكس (Ibrox Stadium - غلاسكو)',
+  'olympiacos': 'ملعب كارايسكاكيس (Karaiskakis Stadium - أثينا)',
+  'أولمبياكوس': 'ملعب كارايسكاكيس (Karaiskakis Stadium - أثينا)',
+  'panathinaikos': 'ملعب أبوستولوس نيكولايديس (أثينا)',
+  'باناثينايكوس': 'ملعب أبوستولوس نيكولايديس (أثينا)',
+  'red star': 'ملعب راجكو ميتيتش (بلغراد)',
+  'النجم الأحمر': 'ملعب راجكو ميتيتش (بلغراد)',
+  'dinamo zagreb': 'ملعب ماكسيمير (Maksimir - زغرب)',
+  'دينامو زغرب': 'ملعب ماكسيمير (Maksimir - زغرب)',
+  'shakhtar': 'ملعب دونباس أرينا',
+  'شاختار': 'ملعب دونباس أرينا',
+
+  // Arab & African Giants
+  'al ain': 'استاد هزاع بن زايد (العين)',
+  'العين': 'استاد هزاع بن زايد (العين)',
+  'shabab al ahli': 'استاد راشد (دبي)',
+  'شباب الأهلي': 'استاد راشد (دبي)',
+  'sharjah': 'استاد نادي الشارقة',
+  'الشارقة': 'استاد نادي الشارقة',
+  'al jazira': 'استاد محمد بن زايد (أبوظبي)',
+  'الجزيرة': 'استاد محمد بن زايد (أبوظبي)',
+  'al sadd': 'استاد جاسم بن حمد (الدوحة)',
+  'السد': 'استاد جاسم بن حمد (الدوحة)',
+  'al duhail': 'استاد عبد الله بن خليفة (الدوحة)',
+  'الدحيل': 'استاد عبد الله بن خليفة (الدوحة)',
+  'al rayyan': 'استاد أحمد بن علي (الريان)',
+  'الريان': 'استاد أحمد بن علي (الريان)',
+  'esperance': 'الملعب الأولمبي حمادي العقربي (رادس)',
+  'الترجي': 'الملعب الأولمبي حمادي العقربي (رادس)',
+  'club africain': 'الملعب الأولمبي حمادي العقربي (رادس)',
+  'النادي الإفريقي': 'الملعب الأولمبي حمادي العقربي (رادس)',
+  'etoile': 'الملعب الأولمبي بسوسة',
+  'النجم الساحلي': 'الملعب الأولمبي بسوسة',
+  'mc alger': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'مولودية الجزائر': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'cr belouizdad': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'شباب بلوزداد': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'usm alger': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'اتحاد الجزائر': 'ملعب 5 جويلية 1962 (الجزائر)',
+  'js kabylie': 'ملعب حسين آيت أحمد (تيزي وزو)',
+  'شبيبة القبائل': 'ملعب حسين آيت أحمد (تيزي وزو)',
 };
 
 // Translations for venue names provided by external feeds
@@ -280,6 +358,13 @@ const VENUE_TRANSLATIONS: Record<string, string> = {
   'camp nou': 'ملعب سبوتيفاي كامب نو (Camp Nou)',
   'estadi olimpic lluis companys': 'ملعب لويس كومبانيس الأولمبي (مونتجويك)',
   'estadi olímpic lluís companys': 'ملعب لويس كومبانيس الأولمبي (مونتجويك)',
+  'rams park': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'ali sami yen': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'turk telekom': 'ملعب رامس بارك (Rams Park - إسطنبول)',
+  'sukru saracoglu': 'ملعب شكري سراج أوغلو (إسطنبول)',
+  'şükrü saracoğlu': 'ملعب شكري سراج أوغلو (إسطنبول)',
+  'tupras': 'ملعب توبراش (Tüpraş Stadyumu - إسطنبول)',
+  'vodafone park': 'ملعب توبراش (Tüpraş Stadyumu - إسطنبول)',
   'etihad stadium': 'ملعب الاتحاد (Etihad Stadium)',
   'emirates stadium': 'ملعب الإمارات (Emirates Stadium)',
   'anfield': 'ملعب آنفيلد (Anfield)',
@@ -310,6 +395,13 @@ const VENUE_TRANSLATIONS: Record<string, string> = {
   'estádio nabi abi chedid': 'ملعب نابي أبي شديد (براغانسا)',
   'maracana': 'ملعب ماراكانا الشهير (ريو دي جانيرو)',
   'maracanã': 'ملعب ماراكانا الشهير (ريو دي جانيرو)',
+  'estadio da luz': 'ملعب النور (Estádio da Luz - لشبونة)',
+  'estádio da luz': 'ملعب النور (Estádio da Luz - لشبونة)',
+  'estadio do dragao': 'ملعب الدراجاو (Estádio do Dragão - بورتو)',
+  'estádio do dragão': 'ملعب الدراجاو (Estádio do Dragão - بورتو)',
+  'johan cruyff arena': 'يوهان كرويف أرينا (Johan Cruyff Arena - أمستردام)',
+  'celtic park': 'سلتيك بارك (Celtic Park - غلاسكو)',
+  'ibrox': 'ملعب إيبروكس (Ibrox Stadium - غلاسكو)',
 };
 
 export function resolveMatchStadium(params: {
@@ -322,13 +414,15 @@ export function resolveMatchStadium(params: {
   const rawVenue = (params.venue || '').trim();
   const home = (params.homeName || '').toLowerCase().trim();
 
-  // 1. If explicit venue given and it's NOT a generic placeholder
+  // 1. If explicit venue given and it's NOT a generic or corrupted placeholder
   if (
     rawVenue &&
     rawVenue !== 'الملعب الرئيسي' &&
     rawVenue !== 'Main Stadium' &&
     rawVenue !== 'Unknown' &&
-    rawVenue !== 'TBD'
+    rawVenue !== 'TBD' &&
+    rawVenue !== 'الملعب الأولمبي الدولي' &&
+    !rawVenue.includes('???')
   ) {
     const vLower = rawVenue.toLowerCase();
     for (const [key, arabicName] of Object.entries(VENUE_TRANSLATIONS)) {
@@ -375,11 +469,44 @@ export function resolveMatchStadium(params: {
   if (countryLower.includes('italy') || countryLower.includes('إيطاليا')) {
     return 'ملعب سان سيرو (ميلانو)';
   }
+  if (countryLower.includes('germany') || countryLower.includes('ألمانيا')) {
+    return 'أليانز أرينا (ميونخ)';
+  }
+  if (countryLower.includes('france') || countryLower.includes('فرنسا')) {
+    return 'ملعب فرنسا الدولي (باريس)';
+  }
+  if (countryLower.includes('turkey') || countryLower.includes('تركيا')) {
+    return 'ملعب رامس بارك (Rams Park - إسطنبول)';
+  }
+  if (countryLower.includes('portugal') || countryLower.includes('البرتغال')) {
+    return 'ملعب النور (Estádio da Luz - لشبونة)';
+  }
+  if (countryLower.includes('netherlands') || countryLower.includes('هولندا')) {
+    return 'يوهان كرويف أرينا (أمستردام)';
+  }
   if (countryLower.includes('brazil') || countryLower.includes('البرازيل')) {
     return 'ملعب ماراكانا الشهير (ريو دي جانيرو)';
   }
+  if (countryLower.includes('algeria') || countryLower.includes('الجزائر')) {
+    return 'ملعب 5 جويلية 1962 (الجزائر)';
+  }
+  if (countryLower.includes('tunisia') || countryLower.includes('تونس')) {
+    return 'الملعب الأولمبي حمادي العقربي (رادس)';
+  }
 
-  return 'الملعب الأولمبي الدولي';
+  // 5. Competition-based authentic stadium
+  const comp = (params.competitionName || '').toLowerCase();
+  if (comp.includes('champions') || comp.includes('أبطال أوروبا') || comp.includes('uefa')) {
+    return 'ملعب ويمبلي الشهير (لندن)';
+  }
+  if (comp.includes('world') || comp.includes('العالم') || comp.includes('fifa')) {
+    return 'استاد لوسيل الأيقوني';
+  }
+  if (comp.includes('afcon') || comp.includes('إفريقيا') || comp.includes('caf')) {
+    return 'المركب الرياضي محمد الخامس (الدار البيضاء)';
+  }
+
+  return 'ملعب ويمبلي الشهير (لندن)';
 }
 
 // Prominent Commentators by Channel / League Network

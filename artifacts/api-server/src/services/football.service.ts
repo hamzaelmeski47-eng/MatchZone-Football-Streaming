@@ -689,26 +689,75 @@ function getHomeTeamStadium(home?: string, country?: string): string {
   if (h.includes("gremio") || h.includes("grêmio")) return "أرينا دو غريميو (Arena do Grêmio)";
   if (h.includes("bragantino")) return "ملعب نابي أبي شديد (براغانسا)";
   if (h.includes("remo")) return "ملعب باينياو (Estádio Baenão)";
-  if (h.includes("real madrid")) return "ملعب سانتياغو برنابيو (Santiago Bernabéu)";
-  if (h.includes("barcelona")) return "ملعب لويس كومبانيس الأولمبي (مونتجويك)";
-  if (h.includes("arsenal")) return "ملعب الإمارات (Emirates Stadium)";
-  if (h.includes("manchester city")) return "ملعب الاتحاد (Etihad Stadium)";
-  if (h.includes("liverpool")) return "ملعب آنفيلد (Anfield)";
-  if (h.includes("manchester united")) return "ملعب أولد ترافورد (Old Trafford)";
-  if (h.includes("chelsea")) return "ملعب ستامفورد بريدج (Stamford Bridge)";
-  if (h.includes("bayern")) return "أليانز أرينا (Allianz Arena - ميونخ)";
-  if (h.includes("paris")) return "ملعب حديقة الأمراء (Parc des Princes - باريس)";
-  if (h.includes("juventus")) return "ملعب أليانز ستاديوم (Allianz Stadium - تورينو)";
-  if (h.includes("inter") || h.includes("milan")) return "ملعب سان سيرو (San Siro - ميلانو)";
-  if (h.includes("al hilal") || h.includes("الهلال")) return "المملكة أرينا (الرياض)";
-  if (h.includes("al nassr") || h.includes("النصر")) return "ملعب الأول بارك (الرياض)";
+  if (h.includes("real madrid") || h.includes("ريال مدريد")) return "ملعب سانتياغو برنابيو (Santiago Bernabéu)";
+  if (h.includes("barcelona") || h.includes("برشلونة")) return "ملعب لويس كومبانيس الأولمبي (مونتجويك)";
+  if (h.includes("arsenal") || h.includes("أرسنال")) return "ملعب الإمارات (Emirates Stadium)";
+  if (h.includes("manchester city") || h.includes("مانشستر سيتي")) return "ملعب الاتحاد (Etihad Stadium)";
+  if (h.includes("liverpool") || h.includes("ليفربول")) return "ملعب آنفيلد (Anfield)";
+  if (h.includes("manchester united") || h.includes("مانشستر يونايتد")) return "ملعب أولد ترافورد (Old Trafford)";
+  if (h.includes("chelsea") || h.includes("تشيلسي")) return "ملعب ستامفورد بريدج (Stamford Bridge)";
+  if (h.includes("tottenham") || h.includes("توتنهام")) return "ملعب توتنهام هوتسبير (Tottenham Hotspur Stadium)";
+  if (h.includes("aston villa") || h.includes("أستون فيلا")) return "ملعب فيلا بارك (Villa Park)";
+  if (h.includes("newcastle") || h.includes("نيوكاسل")) return "ملعب سانت جيمس بارك (St James' Park)";
+  if (h.includes("atletico") || h.includes("أتلتيكو")) return "ملعب سيفيتاس ميتروبوليتانو (Metropolitano)";
+  if (h.includes("athletic") || h.includes("بيلباو")) return "ملعب سان ماميس (San Mamés)";
+  if (h.includes("sevilla") || h.includes("إشبيلية")) return "ملعب رامون سانشيز بيزخوان (Sánchez Pizjuán)";
+  if (h.includes("valencia") || h.includes("فالنسيا")) return "ملعب المستايا (Mestalla)";
+  if (h.includes("bayern") || h.includes("بايرن")) return "أليانز أرينا (Allianz Arena - ميونخ)";
+  if (h.includes("dortmund") || h.includes("دورتموند")) return "ملعب سيغنال إيدونا بارك (Signal Iduna Park)";
+  if (h.includes("leverkusen") || h.includes("ليفركوزن")) return "باي أرينا (BayArena - ليفركوزن)";
+  if (h.includes("paris") || h.includes("باريس")) return "ملعب حديقة الأمراء (Parc des Princes - باريس)";
+  if (h.includes("marseille") || h.includes("مارسيليا")) return "ملعب أورانج فيلودروم (Orange Vélodrome)";
+  if (h.includes("juventus") || h.includes("يوفنتوس")) return "ملعب أليانز ستاديوم (Allianz Stadium - تورينو)";
+  if (h.includes("inter") || h.includes("إنتر") || h.includes("انتر") || h.includes("milan") || h.includes("ميلان")) return "ملعب سان سيرو (San Siro - ميلانو)";
+  if (h.includes("roma") || h.includes("روما") || h.includes("lazio") || h.includes("لاتسيو")) return "ملعب الأولمبيكو (Stadio Olimpico - روما)";
+  if (h.includes("napoli") || h.includes("نابولي")) return "ملعب دييغو أرماندو مارادونا (نابولي)";
+  
+  // Turkish clubs
+  if (h.includes("galatasaray") || h.includes("غلطة سراي") || h.includes("غلطةسراي")) return "ملعب رامس بارك (Rams Park - إسطنبول)";
+  if (h.includes("fenerbahce") || h.includes("fenerbahçe") || h.includes("فنربخشة")) return "ملعب شكري سراج أوغلو (Şükrü Saracoğlu - إسطنبول)";
+  if (h.includes("besiktas") || h.includes("beşiktaş") || h.includes("بشكتاش")) return "ملعب توبراش (Tüpraş Stadyumu - إسطنبول)";
+  if (h.includes("trabzonspor") || h.includes("طرابزون")) return "ملعب بابارا بارك (Papara Park - طرابزون)";
+
+  // Portuguese & Dutch clubs
+  if (h.includes("porto") || h.includes("بورتو")) return "ملعب الدراجاو (Estádio do Dragão - بورتو)";
+  if (h.includes("benfica") || h.includes("بنفيكا")) return "ملعب النور (Estádio da Luz - لشبونة)";
+  if (h.includes("sporting") || h.includes("سبورتينغ") || h.includes("سبورتنج")) return "ملعب خوسيه ألفالادي (José Alvalade - لشبونة)";
+  if (h.includes("ajax") || h.includes("أياكس")) return "يوهان كرويف أرينا (Johan Cruyff Arena - أمستردام)";
+  if (h.includes("psv") || h.includes("آيندهوفن")) return "ملعب فيليبس (Philips Stadion - آيندهوفن)";
+  if (h.includes("feyenoord") || h.includes("فاينورد")) return "ملعب دي كويب (De Kuip - روتردام)";
+  if (h.includes("celtic") || h.includes("سلتيك")) return "سلتيك بارك (Celtic Park - غلاسكو)";
+  if (h.includes("rangers") || h.includes("رينجرز")) return "ملعب إيبروكس (Ibrox Stadium - غلاسكو)";
+
+  // Arab & African clubs
+  if (h.includes("al hilal") || h.includes("الهلال")) return "المملكة أرينا (Kingdom Arena - الرياض)";
+  if (h.includes("al nassr") || h.includes("النصر")) return "ملعب الأول بارك (Al-Awwal Park - الرياض)";
   if (h.includes("al ittihad") || h.includes("الاتحاد")) return "مدينة الملك عبد الله الرياضية (الجوهرة المشعة)";
+  if (h.includes("al ahli") || h.includes("الأهلي السعودي")) return "مدينة الملك عبد الله الرياضية (الجوهرة المشعة)";
+  if (h.includes("al ain") || h.includes("العين")) return "استاد هزاع بن زايد (العين)";
+  if (h.includes("shabab al ahli") || h.includes("شباب الأهلي")) return "استاد راشد (دبي)";
+  if (h.includes("al sadd") || h.includes("السد")) return "استاد جاسم بن حمد (الدوحة)";
   if (h.includes("wydad") || h.includes("raja") || h.includes("الوداد") || h.includes("الرجاء")) return "المركب الرياضي محمد الخامس (الدار البيضاء)";
   if (h.includes("as far") || h.includes("الجيش الملكي")) return "المجمع الرياضي الأمير مولاي عبد الله (الرباط)";
+  if (h.includes("rs berkane") || h.includes("نهضة بركان")) return "الملعب البلدي ببركان";
   if (h.includes("al ahly") || h.includes("zamalek") || h.includes("الأهلي") || h.includes("الزمالك")) return "ستاد القاهرة الدولي";
+  if (h.includes("esperance") || h.includes("الترجي")) return "الملعب الأولمبي حمادي العقربي (رادس)";
+  if (h.includes("mc alger") || h.includes("مولودية الجزائر")) return "ملعب 5 جويلية 1962 (الجزائر)";
+
+  // Country fallback
   if (country === "Brazil" || country === "البرازيل") return "ملعب ماراكانا الشهير (ريو دي جانيرو)";
   if (country === "England" || country === "إنجلترا") return "ملعب ويمبلي الشهير (لندن)";
-  return "الملعب الأولمبي الدولي";
+  if (country === "Spain" || country === "إسبانيا") return "ملعب سانتياغو برنابيو (مدريد)";
+  if (country === "Germany" || country === "ألمانيا") return "أليانز أرينا (ميونخ)";
+  if (country === "Italy" || country === "إيطاليا") return "ملعب سان سيرو (ميلانو)";
+  if (country === "France" || country === "فرنسا") return "ملعب فرنسا الدولي (باريس)";
+  if (country === "Turkey" || country === "تركيا") return "ملعب رامس بارك (Rams Park - إسطنبول)";
+  if (country === "Portugal" || country === "البرتغال") return "ملعب النور (Estádio da Luz - لشبونة)";
+  if (country === "Morocco" || country === "المغرب") return "المركب الرياضي محمد الخامس (الدار البيضاء)";
+  if (country === "Saudi Arabia" || country === "السعودية") return "مدينة الملك عبد الله الرياضية (الجوهرة المشعة)";
+  if (country === "Egypt" || country === "مصر") return "ستاد القاهرة الدولي";
+
+  return "ملعب ويمبلي الشهير (لندن)";
 }
 
 export function espnEventToFixture(ev: any): ApiFootballFixture | null {

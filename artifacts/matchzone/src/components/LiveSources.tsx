@@ -159,11 +159,7 @@ export function LiveSources({
       });
     }
     setSources((prev) => {
-      let finalEmbedUrl = ch.embedUrl;
-      const chIdMatch = finalEmbedUrl.match(/matchora\.to\/embed\/channel\/([0-9a-zA-Z_-]+)/i);
-      if (chIdMatch && chIdMatch[1]) {
-        finalEmbedUrl = `https://matchora.to/embed/match/${matchId}?ch=${chIdMatch[1]}`;
-      }
+      const finalEmbedUrl = ch.embedUrl;
       const newSource: LiveSource = {
         id: `channel-${ch.id}`,
         name: ch.name,

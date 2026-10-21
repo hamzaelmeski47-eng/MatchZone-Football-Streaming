@@ -337,10 +337,10 @@ class MatchoraService {
 
     const isBein = broadcaster.toLowerCase().includes("bein");
 
-    // Use official match embed format with preselected channel per Matchora developer docs
+    // Prefer direct channel embed over match embed to avoid event ID dependency and channel overlays
     const directChannelEmbed = event.channels && event.channels.length > 0
-      ? `https://matchora.to/embed/match/${event.id}?ch=${event.channels[0].id}`
-      : (event.embed_url || `https://matchora.to/embed/match/${event.id}`);
+      ? (event.channels[0].embed_url || `https://matchora.to/embed/channel/${event.channels[0].id}`)
+      : (event.embed_url || `https://matchora.to/embed/channel/${event.id}`);
 
     return {
       available: true,
@@ -499,9 +499,7 @@ class MatchoraService {
           id: String(selected.id || `matchora-ch-1`),
           name: displayName,
           channel: specificChannel,
-          embedUrl: selected.id
-            ? `https://matchora.to/embed/match/${event.id}?ch=${selected.id}`
-            : (event.embed_url || `https://matchora.to/embed/match/${event.id}`),
+          embedUrl: selected.embed_url || `https://matchora.to/embed/channel/${selected.id}`,
           quality: "HD", // Guaranteed HD as requested
           lang: "Arabic",
           commentator: "معلق عربي",
@@ -511,7 +509,7 @@ class MatchoraService {
       ];
     }
 
-    // If no Arabic channel, use top valid channel with match embed + ?ch=
+    // If no Arabic channel, use top valid channel directly
     const top = valid[0];
     const isBein = isBeinChannel(top.name);
     return [
@@ -519,9 +517,7 @@ class MatchoraService {
         id: String(top.id || `matchora-ch-1`),
         name: formatChannelName(top, 0),
         channel: isBein ? "beIN Sports 1 HD" : top.name,
-        embedUrl: top.id
-          ? `https://matchora.to/embed/match/${event.id}?ch=${top.id}`
-          : (event.embed_url || `https://matchora.to/embed/match/${event.id}`),
+        embedUrl: top.embed_url || `https://matchora.to/embed/channel/${top.id}`,
         quality: "HD",
         lang: top.lang,
         commentator: undefined,

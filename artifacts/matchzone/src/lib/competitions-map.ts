@@ -1192,8 +1192,20 @@ export function resolveMatchBroadcaster(params: {
     const isTopUefa =
       home.includes('real madrid') || home.includes('manchester city') || home.includes('bayern') ||
       home.includes('paris') || home.includes('barcelona') || home.includes('arsenal') || home.includes('liverpool') ||
+      home.includes('ريال مدريد') || home.includes('برشلونة') || home.includes('مانشستر سيتي') || home.includes('بايرن') ||
+      home.includes('ليفربول') || home.includes('أرسنال') || home.includes('ارسنال') || home.includes('باريس') ||
+      home.includes('تشيلسي') || home.includes('chelsea') || home.includes('إنتر') || home.includes('انتر') ||
+      home.includes('inter') || home.includes('milan') || home.includes('ميلان') || home.includes('يوفنتوس') ||
+      home.includes('juventus') || home.includes('أتلتيكو') || home.includes('atletico') || home.includes('دورتموند') ||
+      home.includes('dortmund') || home.includes('غلطة سراي') || home.includes('غلطةسراي') || home.includes('galatasaray') ||
       away.includes('real madrid') || away.includes('manchester city') || away.includes('bayern') ||
-      away.includes('paris') || away.includes('barcelona') || away.includes('arsenal') || away.includes('liverpool');
+      away.includes('paris') || away.includes('barcelona') || away.includes('arsenal') || away.includes('liverpool') ||
+      away.includes('ريال مدريد') || away.includes('برشلونة') || away.includes('مانشستر سيتي') || away.includes('بايرن') ||
+      away.includes('ليفربول') || away.includes('أرسنال') || away.includes('ارسنال') || away.includes('باريس') ||
+      away.includes('تشيلسي') || away.includes('chelsea') || away.includes('إنتر') || away.includes('انتر') ||
+      away.includes('inter') || away.includes('milan') || away.includes('ميلان') || away.includes('يوفنتوس') ||
+      away.includes('juventus') || away.includes('أتلتيكو') || away.includes('atletico') || away.includes('دورتموند') ||
+      away.includes('dortmund') || away.includes('غلطة سراي') || away.includes('غلطةسراي') || away.includes('galatasaray');
     if (isTopUefa) return 'beIN Sports 1 HD';
     return 'beIN Sports 2 HD';
   }

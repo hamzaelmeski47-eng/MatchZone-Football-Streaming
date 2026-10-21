@@ -56,24 +56,34 @@ router.get("/clean-embed", asyncHandler(async (req, res) => {
     html = html.replace(/<script[\s\S]*?__moSandbox[\s\S]*?<\/script>/gi, "<!-- sandbox-detector-stripped -->");
     html = html.replace(/<script[\s\S]*?mosb[\s\S]*?<\/script>/gi, "<!-- sandbox-banner-stripped -->");
     html = html.replace(/<script[\s\S]*?window\.__moSandbox[\s\S]*?<\/script>/gi, "<!-- sandbox-check-stripped -->");
+    html = html.replace(/<script[\s\S]*?Chrome PDF Viewer[\s\S]*?<\/script>/gi, "<!-- pdf-check-stripped -->");
+    html = html.replace(/<script[\s\S]*?embed-sandboxed[\s\S]*?<\/script>/gi, "<!-- embed-sandboxed-stripped -->");
+    html = html.replace(/u\.searchParams\.set\(["']sb["'],\s*["']1["']\)/gi, 'console.log("sb blocked")');
+    html = html.replace(/var stop=1&&\(reason===["']sandbox["']\|\|reason===["']popups["']\);/gi, 'var stop=0;');
     html = html.replace(/<script[\s\S]*?249903[\s\S]*?<\/script>/gi, "<!-- popup-zone-stripped -->");
     html = html.replace(/<script[\s\S]*?last=0,done=false[\s\S]*?<\/script>/gi, "<!-- click-hijack-stripped -->");
     html = html.replace(/<script[\s\S]*?umami[\s\S]*?<\/script>/gi, "<!-- umami-stripped -->");
     html = html.replace(/<script[\s\S]*?frubth[\s\S]*?<\/script>/gi, "<!-- ad-burst-stripped -->");
 
-    // 2. Add base tag so assets (styles, Hls.js, svgs) resolve to matchora.to
-    const baseDomain = new URL(targetUrl).origin;
-    if (!html.includes("<base ")) {
-      html = html.replace("<head>", `<head><base href="${baseDomain}/">`);
-    }
+    // 2. Ensure relative assets resolve to matchora.to without adding a base tag (which hijacks relative API routes)
+    html = html.replace(/src=["']\/logo\.webp["']/gi, 'src="https://matchora.to/logo.webp"');
+    html = html.replace(/href=["']\/favicon\.ico["']/gi, 'href="https://matchora.to/favicon.ico"');
+    html = html.replace(/href=["']\/icon\.png["']/gi, 'href="https://matchora.to/icon.png"');
 
-    // 3. Rewrite /api/play/ calls to our backend proxy to bypass CORS
+    // 3. Rewrite /api/play/ calls to our backend proxy
     html = html.replace(/\/api\/play\//g, "/api/streams/play-proxy/");
+    // Also rewrite telemetry endpoints directly to matchora.to
+    html = html.replace(/\/api\/leave\//g, "https://matchora.to/api/leave/");
+    html = html.replace(/\/api\/report\//g, "https://matchora.to/api/report/");
+    html = html.replace(/\/api\/cap/g, "https://matchora.to/api/cap");
 
-    // 4. Ensure video has playsinline and webkit-playsinline for iOS/Safari
-    html = html.replace(/<video id="v"/i, '<video id="v" playsinline webkit-playsinline');
+    // 4. Force START_MUTED=true so Chrome autoplay policy allows immediate seamless playback without manual play button
+    html = html.replace(/START_MUTED\s*=\s*false/g, "START_MUTED=true");
 
-    // 5. Inject strict anti-popup defense & mobile autoplay unlock directly inside the player
+    // 5. Ensure video has playsinline and webkit-playsinline for iOS/Safari
+    html = html.replace(/<video id="v"/i, '<video id="v" playsinline webkit-playsinline muted');
+
+    // 6. Inject strict anti-popup defense & instant autoplay unlock directly inside the player
     const antiPopupScript = `
       <script>
         // Completely neutralize window.open popup ads
@@ -87,29 +97,45 @@ router.get("/clean-embed", asyncHandler(async (req, res) => {
           }
         }, true);
 
-        // Mobile Safari autoplay unlock: ensure video starts playing smoothly
+        // Safeguard fetch: ensure play requests route to this backend's proxy even if origin differs
         (function() {
-          function unlockPlayback() {
+          var origFetch = window.fetch;
+          window.fetch = function(input, init) {
+            if (typeof input === 'string') {
+              if (input.indexOf('/api/play/') !== -1) {
+                input = input.replace(/.*?\\/api\\/play\\//, '/api/streams/play-proxy/');
+              } else if (input.indexOf('matchora.to/api/streams/play-proxy/') !== -1) {
+                input = input.replace(/^https?:\\/\\/[^\\/]*matchora\\.to/, '');
+              }
+            }
+            return origFetch.call(this, input, init);
+          };
+        })();
+
+        // Instant autoplay and interaction unmute
+        (function() {
+          function triggerPlay() {
             var v = document.getElementById('v');
             if (v && v.paused) {
-              v.play().catch(function() {
-                v.muted = true;
-                v.play().catch(function() {});
-              });
+              v.muted = true;
+              v.play().catch(function() {});
             }
           }
           if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', unlockPlayback);
+            document.addEventListener('DOMContentLoaded', triggerPlay);
           } else {
-            unlockPlayback();
+            triggerPlay();
           }
-          // On any user tap, unmute if muted
-          window.addEventListener('touchstart', function() {
+
+          function unmuteAndPlay() {
             var v = document.getElementById('v');
-            if (v && v.muted) {
+            if (v) {
               v.muted = false;
+              if (v.paused) v.play().catch(function() {});
             }
-          }, { once: true });
+          }
+          document.addEventListener('click', unmuteAndPlay, false);
+          document.addEventListener('touchstart', unmuteAndPlay, false);
         })();
       </script>
     `;
@@ -141,11 +167,84 @@ router.get("/play-proxy/:ch", asyncHandler(async (req, res) => {
       },
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
+    if (data && data.url && typeof data.url === "string") {
+      // Wrap stream URL in our HLS proxy so CDN cross-origin restrictions are completely bypassed
+      data.url = `/api/streams/hls-proxy?url=${encodeURIComponent(data.url)}`;
+    }
     res.setHeader("Access-Control-Allow-Origin", "*");
     return res.json(data);
   } catch (err: any) {
     return res.status(502).json({ error: "Failed to fetch stream token" });
+  }
+}));
+
+/**
+ * GET /api/streams/hls-proxy
+ * Proxies HLS playlists (.m3u8) and video fragments (.ts)
+ * bypassing CDN CORS restrictions and ensuring uninterrupted playback.
+ */
+router.get("/hls-proxy", asyncHandler(async (req, res) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl || typeof targetUrl !== "string" || !targetUrl.startsWith("https://")) {
+    return res.status(400).send("Invalid stream target URL");
+  }
+
+  try {
+    const response = await fetch(targetUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Referer": "https://matchora.to/",
+        "Origin": "https://matchora.to",
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).send("Failed to stream chunk");
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+
+    // If playlist (.m3u8 or mpegurl), rewrite segment URLs to route through proxy
+    if (targetUrl.includes(".m3u8") || contentType.includes("mpegurl")) {
+      const playlist = await response.text();
+      const baseUri = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
+      const urlQuery = targetUrl.includes("?") ? targetUrl.substring(targetUrl.indexOf("?")) : "";
+
+      const lines = playlist.split("\n");
+      const rewritten = lines.map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) return line;
+        let fullUrl = trimmed.startsWith("http://") || trimmed.startsWith("https://")
+          ? trimmed
+          : new URL(trimmed, baseUri).toString();
+        if (!fullUrl.includes("?") && urlQuery) {
+          fullUrl += urlQuery;
+        }
+        return `/api/streams/hls-proxy?url=${encodeURIComponent(fullUrl)}`;
+      });
+
+      res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+      res.setHeader("Cache-Control", "no-cache, no-store");
+      return res.send(rewritten.join("\n"));
+    }
+
+    // Binary segment (.ts / .m4s / etc.)
+    if (contentType) res.setHeader("Content-Type", contentType);
+    const contentLength = response.headers.get("content-length");
+    if (contentLength) res.setHeader("Content-Length", contentLength);
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    if (response.body) {
+      const { Readable } = await import("stream");
+      return (Readable.fromWeb(response.body as any) as any).pipe(res);
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return res.send(buffer);
+  } catch (err: any) {
+    return res.status(502).send("HLS proxy error");
   }
 }));
 
