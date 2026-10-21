@@ -1,9 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "matchzone",
+  "main": "worker.js",
   "compatibility_date": "2024-09-23",
-  "pages_build_output_dir": "artifacts/matchzone/dist/public",
   "assets": {
-    "directory": "artifacts/matchzone/dist/public"
+    "directory": "artifacts/matchzone/dist/public",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
   }
 }
