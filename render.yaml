@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: matchzone
+    env: node
+    plan: free
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: PORT
+        value: 5000
