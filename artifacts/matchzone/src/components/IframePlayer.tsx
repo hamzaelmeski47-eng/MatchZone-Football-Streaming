@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Maximize2, RefreshCw, Radio, Loader2, AlertTriangle } from 'lucide-react';
+import { API_BASE } from '@/lib/api';
 
 export interface IframePlayerProps {
   src: string;
@@ -229,7 +230,7 @@ export function IframePlayer({ src, title, onError,
         }
 
         const finalPlayerSrc = cleanSrc.includes('matchora.to')
-          ? `/api/streams/clean-embed?url=${encodeURIComponent(cleanSrc)}`
+          ? `${API_BASE}/streams/clean-embed?url=${encodeURIComponent(cleanSrc)}`
           : cleanSrc;
 
         return (

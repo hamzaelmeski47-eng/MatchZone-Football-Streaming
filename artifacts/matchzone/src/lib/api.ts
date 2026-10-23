@@ -4,7 +4,7 @@ import { getArabicTeamName } from './arabic-helpers';
 import { formatCompetitionInfo, normalizeCompetitionName } from './competitions-map';
 import { resolveMatchStadium, isBrazilianMatch, type TeamFormResult, type H2HResult } from './match-details-helpers';
 
-const API_BASE = '/api';
+export const API_BASE = ((typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api').replace(/\/+$/, '');
 const TOKEN_KEY = 'matchzone-token';
 const USER_KEY = 'matchzone-user';
 
